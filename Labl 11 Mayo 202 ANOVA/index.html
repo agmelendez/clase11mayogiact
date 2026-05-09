@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Autoguiado: Análisis de Varianza ANOVA (PhD Level)</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #eff6ff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e1e1e;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --sidebar-width: 280px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.03);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, #1e40af, var(--accent-color));
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .sidebar-header p { font-size: 0.85rem; opacity: 0.9; }
+
+        .nav-links { list-style: none; padding: 1rem 0; flex-grow: 1; }
+
+        .nav-links li a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li a:hover, .nav-links li a.active {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+        }
+
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--border-color); text-align: center; }
+
+        .btn-export {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-export:hover { background-color: #dc2626; }
+
+        main {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 3rem;
+            max-width: 1100px;
+        }
+
+        header.page-header { margin-bottom: 3rem; animation: fadeInDown 0.8s ease-out; }
+
+        header.page-header h1 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        header.page-header p.lead { font-size: 1.15rem; color: var(--text-muted); max-width: 800px; }
+
+        section { margin-bottom: 4rem; scroll-margin-top: 2rem; animation: fadeIn 1s ease-out; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title .badge {
+            background: var(--accent-light);
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .code-container {
+            position: relative;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        pre[class*="language-"] {
+            margin: 0 !important;
+            padding: 1.5rem !important;
+            background: var(--code-bg) !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem; right: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .copy-btn.copied { background: var(--success-color); border-color: var(--success-color); }
+
+        .student-workspace {
+            margin-top: 2rem;
+            padding: 2rem;
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .student-workspace::before {
+            content: '✏️ Tu Espacio de Trabajo';
+            position: absolute;
+            top: -12px; left: 20px;
+            background: #f8fafc;
+            padding: 0 10px;
+            font-weight: 600;
+            color: var(--accent-color);
+            font-size: 0.95rem;
+        }
+
+        .workspace-field { margin-bottom: 1.5rem; }
+        .workspace-field:last-child { margin-bottom: 0; }
+
+        .workspace-field label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .editable-area {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: white;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .editable-area[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: #94a3b8;
+            pointer-events: none;
+            display: block;
+        }
+
+        .editable-area.interpretation-area {
+            min-height: 120px;
+            border-color: #93c5fd;
+            background-color: #eff6ff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .editable-area:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .image-upload { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; }
+
+        .image-preview { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .remove-img-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .alert {
+            padding: 1.25rem 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .alert-info { border-left-color: var(--accent-color); background-color: var(--accent-light); }
+        .alert-warning { border-left-color: var(--warning-color); background-color: #fef3c7; }
+        .alert-success { border-left-color: var(--success-color); background-color: #d1fae5; }
+        .alert-danger { border-left-color: var(--danger-color); background-color: #fee2e2; }
+        .alert strong { display: block; margin-bottom: 0.5rem; font-size: 1.05rem; }
+
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { padding: 0.75rem 1rem; border: 1px solid var(--border-color); text-align: left; }
+        th { background-color: var(--accent-light); color: var(--accent-color); font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+
+        .formula-block {
+            background-color: var(--bg-color);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.15rem;
+            font-family: 'Fira Code', monospace;
+            margin: 1rem 0;
+            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            main { margin-left: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            .card { box-shadow: none !important; border: none !important; margin-bottom: 20px; page-break-inside: avoid; }
+            .student-workspace { border: 1px solid #000 !important; background: white !important; page-break-inside: avoid; }
+            .editable-area { border: 1px solid #ccc !important; }
+        }
+
+        @media (max-width: 992px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+            main { margin-left: 0; padding: 2rem 1.5rem; }
+            .nav-links { display: flex; overflow-x: auto; padding: 0; }
+            .nav-links li a { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+            .nav-links li a.active { border-left: none; border-bottom-color: var(--accent-color); }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="no-print">
+        <div class="sidebar-header">
+            <h2>Laboratorio ANOVA</h2>
+            <p>Análisis de Varianza Completo</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html" style="font-weight: 700; border-left: 4px solid var(--danger-color); color: var(--danger-color);">⬅ Volver al Menú Principal</a></li>
+            <li><a href="#intro" class="active">Introducción</a></li>
+            <li><a href="#teoria-intro">I. T: ANOVA en Gestión Marina</a></li>
+            <li><a href="#teoria-modelos">II. T: Partición de Varianza</a></li>
+            <li><a href="#teoria-supuestos">III. T: Supuestos y Pruebas</a></li>
+            <li><a href="#teoria-posthoc">IV. T: Comparaciones Múltiples</a></li>
+            <li><a href="#teoria-ejemplo">V. T: Ejemplo Aplicado</a></li>
+            <li><a href="#modulo1">1. L: Generación de Datos</a></li>
+            <li><a href="#modulo2">2. L: ANOVA Unifactorial</a></li>
+            <li><a href="#modulo3">3. L: ANOVA Factorial 3×2</a></li>
+            <li><a href="#modulo4">4. L: Diagnóstico de Supuestos</a></li>
+            <li><a href="#modulo5">5. L: Post-hoc y Tamaño de Efecto</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn-export" onclick="exportToPDF()">
+                📄 Exportar a PDF
+            </button>
+        </div>
+    </aside>
+
+    <main id="lab-content">
+        <header class="page-header" id="intro">
+            <h1>Sesión 11: Análisis de Varianza (ANOVA) Completo</h1>
+            <p class="lead">Laboratorio Autoguiado para Google Colab. Estudiaremos el diseño y análisis factorial de varianza en el contexto de Áreas Marinas Protegidas, cubriendo ANOVA unifactorial, factorial con interacciones, diagnóstico de supuestos, comparaciones múltiples post-hoc y estimación del tamaño del efecto.</p>
+        </header>
+
+        <!-- TEORÍA 1 -->
+        <section id="teoria-intro">
+            <div class="card" style="font-size: 0.95rem; line-height: 1.7;">
+                <h2 class="section-title"><span class="badge">Teoría 1</span> ANOVA en la Gestión Marina Costera</h2>
+                <p>El Análisis de Varianza (ANOVA) es la herramienta de inferencia estadística más apropiada cuando el objetivo es <strong>comparar las medias de tres o más grupos</strong> definidos por una o más variables categóricas (factores). En el contexto del manejo marino costero, esta situación es omnipresente:</p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>¿La biomasa de peces difiere significativamente entre zonas con distintos niveles de protección marina?</li>
+                    <li>¿La riqueza de especies coralinas varía entre estaciones climáticas y tipos de sustrato?</li>
+                    <li>¿El efecto de la protección sobre la biodiversidad es el mismo en temporada seca y lluviosa?</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <strong>¿Por qué no hacer múltiples pruebas t?</strong>
+                    Si comparamos k = 3 grupos mediante pares de pruebas t (α = 0.05 cada una), la probabilidad de cometer al menos un Error Tipo I se infla a <strong>1 − (0.95)³ = 14.3%</strong>. Con k = 5 grupos son 10 pares y la tasa de error sube al 40.1%. El ANOVA controla esta inflación mediante una única prueba F global.
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">El Experimento de esta Sesión</h4>
+                <p>Trabajaremos con datos sintéticos de un estudio de <strong>Biomasa de Peces (kg/100m²)</strong> medida en tres tipos de zonas de un sistema de Área Marina Protegida (AMP):</p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Factor A — Nivel de Protección (3 niveles):</strong> AMP_Total (núcleo sin pesca), AMP_Parcial (zona tampón regulada), Acceso_Libre (zona sin restricciones).</li>
+                    <li><strong>Factor B — Estación Climática (2 niveles):</strong> Temporada Seca y Temporada Lluviosa.</li>
+                    <li><strong>Variable respuesta Y:</strong> Biomasa de peces en kg/100m² (medida continua).</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <strong>Pregunta de investigación central:</strong><br>
+                    ¿El nivel de protección marina tiene un efecto estadísticamente significativo sobre la biomasa de peces? ¿Interactúa ese efecto con la estación climática?
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;" class="no-print">
+                    <a href="instrumento_simulacion_anova.html" class="copy-btn" style="text-decoration: none; display: inline-block; text-align: center; background-color: var(--accent-color); padding: 10px 20px; font-weight: 600;">
+                        🛠️ Instrumento de Simulación ANOVA
+                    </a>
+                    <a href="clasificador_analisis_anova.html" class="copy-btn" style="text-decoration: none; display: inline-block; text-align: center; background-color: var(--accent-color); padding: 10px 20px; font-weight: 600;">
+                        📊 Clasificador de Diseños ANOVA
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- TEORÍA 2 -->
+        <section id="teoria-modelos">
+            <div class="card" style="font-size: 0.95rem; line-height: 1.7;">
+                <h2 class="section-title"><span class="badge">Teoría 2</span> Partición de la Varianza y el Estadístico F</h2>
+
+                <h4>1. El Modelo Lineal Subyacente</h4>
+                <p>El ANOVA es un caso especial del Modelo Lineal General. Para un diseño unifactorial con k grupos, el modelo de efectos es:</p>
+                <div class="formula-block">Y<sub>ij</sub> = μ + α<sub>i</sub> + ε<sub>ij</sub></div>
+                <p>Donde μ es la gran media poblacional, α<sub>i</sub> es el efecto del nivel i del factor (con Σα<sub>i</sub> = 0), y ε<sub>ij</sub> ~ N(0, σ²) es el error aleatorio dentro de cada grupo.</p>
+
+                <h4 style="margin-top: 1.5rem;">2. Partición de la Varianza Total (SST)</h4>
+                <p>La idea central es descomponer la variabilidad total de los datos en componentes atribuibles a fuentes conocidas:</p>
+                <div class="formula-block">SS<sub>Total</sub> = SS<sub>Entre grupos</sub> + SS<sub>Dentro de grupos</sub></div>
+
+                <table>
+                    <thead>
+                        <tr><th>Fuente</th><th>Suma de Cuadrados</th><th>gl</th><th>Cuadrado Medio</th><th>F</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Factor A (entre grupos)</strong></td><td>SS<sub>A</sub> = Σn<sub>i</sub>(Ȳ<sub>i</sub> − Ȳ)²</td><td>k − 1</td><td>MS<sub>A</sub> = SS<sub>A</sub>/(k−1)</td><td>MS<sub>A</sub>/MS<sub>E</sub></td></tr>
+                        <tr><td><strong>Error (dentro de grupos)</strong></td><td>SS<sub>E</sub> = ΣΣ(Y<sub>ij</sub> − Ȳ<sub>i</sub>)²</td><td>N − k</td><td>MS<sub>E</sub> = SS<sub>E</sub>/(N−k)</td><td>—</td></tr>
+                        <tr><td><strong>Total</strong></td><td>SS<sub>T</sub> = ΣΣ(Y<sub>ij</sub> − Ȳ)²</td><td>N − 1</td><td>—</td><td>—</td></tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top: 1.5rem;">3. ANOVA Factorial de Dos Factores (3×2)</h4>
+                <p>Con dos factores A (protección, k=3) y B (estación, j=2) y su interacción, la partición se extiende a:</p>
+                <div class="formula-block">SS<sub>T</sub> = SS<sub>A</sub> + SS<sub>B</sub> + SS<sub>A×B</sub> + SS<sub>E</sub></div>
+
+                <div class="alert alert-info">
+                    <strong>La interacción A×B es conceptualmente crítica:</strong><br>
+                    Si la interacción es significativa, el efecto de la protección marina sobre la biomasa NO es el mismo en ambas estaciones. En ese caso, reportar solo los efectos principales sería metodológicamente incorrecto. Debe procederse con el análisis de <em>efectos simples</em> (simple effects analysis).
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">4. La Hipótesis Nula y su Interpretación</h4>
+                <p>Para el Factor A (protección): H₀: μ<sub>APM_Total</sub> = μ<sub>APM_Parcial</sub> = μ<sub>Acceso_Libre</sub></p>
+                <p>El estadístico F mide la razón señal/ruido: cuánto mayor es la variabilidad <em>entre</em> grupos respecto a la variabilidad <em>dentro</em> de ellos. Bajo H₀, F sigue una distribución F(k−1, N−k). Un F significativo solo indica que <em>algún par</em> de medias difiere; para saber cuáles, se necesitan pruebas post-hoc.</p>
+            </div>
+        </section>
+
+        <!-- TEORÍA 3 -->
+        <section id="teoria-supuestos">
+            <div class="card" style="font-size: 0.95rem; line-height: 1.7;">
+                <h2 class="section-title"><span class="badge">Teoría 3</span> Supuestos del ANOVA y Pruebas Formales</h2>
+                <p>El ANOVA paramétrico descansa en tres supuestos estocásticos. Violaciones severas pueden inflar el error de Tipo I o reducir la potencia estadística.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Supuesto</th>
+                            <th>Descripción en Contexto Marina</th>
+                            <th>Prueba Formal</th>
+                            <th>Alternativa si se Viola</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Normalidad</strong></td>
+                            <td>Los errores (residuos dentro de cada grupo) se distribuyen normalmente. No aplica a cada variable X, sino a los residuos del modelo.</td>
+                            <td><strong>Shapiro-Wilk</strong> por grupo o sobre residuos del modelo. H₀: normalidad (buscamos p &gt; 0.05).</td>
+                            <td>Kruskal-Wallis (no paramétrico) o transformación Box-Cox sobre Y.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Homocedasticidad</strong></td>
+                            <td>La varianza de la biomasa dentro de cada zona de protección debe ser estadísticamente igual (homogeneidad de varianzas). Si la zona protegida tiene mucho más variabilidad que la abierta, el modelo es inválido.</td>
+                            <td><strong>Prueba de Levene</strong> (más robusta que Bartlett ante no-normalidad). H₀: σ²₁ = σ²₂ = σ²₃ (buscamos p &gt; 0.05).</td>
+                            <td>ANOVA de Welch (no asume igualdad de varianzas) o Games-Howell para post-hoc.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Independencia</strong></td>
+                            <td>Las observaciones deben ser independientes entre sí. Si varias mediciones vienen de la misma estación o diver, existe pseudoreplicación que viola este supuesto.</td>
+                            <td>No existe una prueba formal genérica; se verifica mediante el diseño experimental (aleatorización, ausencia de estructura temporal/espacial no controlada).</td>
+                            <td>Modelos mixtos (LMM) o ANOVA de medidas repetidas según la estructura de dependencia.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-warning">
+                    <strong>Nota sobre la Prueba de Levene vs. Bartlett:</strong><br>
+                    La prueba de Bartlett asume normalidad dentro de los grupos para ser válida. La de Levene, al basarse en las desviaciones absolutas respecto a la mediana de cada grupo, es robusta ante no-normalidad y es la preferida en la práctica aplicada del ANOVA.
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">Robustez del ANOVA</h4>
+                <p>El ANOVA es razonablemente robusto ante violaciones moderadas de normalidad cuando los grupos son de tamaño similar (diseño balanceado) y el N total es suficientemente grande (Teorema Central del Límite aplicado a las medias). La homocedasticidad es el supuesto más crítico para mantener el control del error de Tipo I.</p>
+            </div>
+        </section>
+
+        <!-- TEORÍA 4 -->
+        <section id="teoria-posthoc">
+            <div class="card" style="font-size: 0.95rem; line-height: 1.7;">
+                <h2 class="section-title"><span class="badge">Teoría 4</span> Comparaciones Múltiples Post-hoc y Tamaño del Efecto</h2>
+
+                <h4>1. ¿Por qué son necesarias las pruebas post-hoc?</h4>
+                <p>Un ANOVA significativo indica solo que <em>al menos dos medias difieren</em>. No indica cuáles. Las pruebas post-hoc realizan todas las comparaciones por pares controlando la tasa de error global (FWER: Family-Wise Error Rate).</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Procedimiento</th><th>Control de Error</th><th>Cuándo Usarlo</th><th>Potencia</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Tukey HSD</strong></td>
+                            <td>FWER ≤ α para todas las comparaciones</td>
+                            <td>Diseños balanceados (n<sub>i</sub> iguales). El más utilizado en ecología y biología marina.</td>
+                            <td>Alta (recomendado)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bonferroni</strong></td>
+                            <td>α/m (donde m = número de comparaciones)</td>
+                            <td>Cualquier diseño; cuando hay pocas comparaciones planificadas a priori.</td>
+                            <td>Conservador (menor potencia que Tukey)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Games-Howell</strong></td>
+                            <td>FWER ≤ α (ajustado)</td>
+                            <td>Cuando Levene es significativo (varianzas heterogéneas). No asume homocedasticidad.</td>
+                            <td>Alta para varianzas desiguales</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dunnett</strong></td>
+                            <td>FWER ≤ α</td>
+                            <td>Comparar todos los grupos contra un único grupo de control.</td>
+                            <td>Alta si hay control designado</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="margin-top: 1.5rem;">2. Tamaño del Efecto: Más allá del p-valor</h4>
+                <p>La significancia estadística no implica relevancia práctica. En gestión marina, un efecto estadísticamente significativo pero de tamaño trivial no justifica políticas restrictivas costosas.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Medida</th><th>Fórmula</th><th>Interpretación (Cohen)</th><th>Limitación</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>η² (eta-cuadrado)</strong></td>
+                            <td>SS<sub>A</sub> / SS<sub>T</sub></td>
+                            <td>Pequeño: 0.01 | Mediano: 0.06 | Grande: 0.14</td>
+                            <td>Sobreestima el efecto en la población (sesgado)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ω² (omega-cuadrado)</strong></td>
+                            <td>(SS<sub>A</sub> − (k−1)·MS<sub>E</sub>) / (SS<sub>T</sub> + MS<sub>E</sub>)</td>
+                            <td>Mismos umbrales que η²</td>
+                            <td>Estimador insesgado, preferido para reportar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>η² parcial</strong></td>
+                            <td>SS<sub>A</sub> / (SS<sub>A</sub> + SS<sub>E</sub>)</td>
+                            <td>Para ANOVA factorial: varianza explicada por A descontando B e interacción</td>
+                            <td>Puede sumar &gt;1 en factorial (no comparar directamente entre factores)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-info">
+                    <strong>Recomendación para reportar en investigación de maestría/doctorado:</strong><br>
+                    Reporte siempre F(gl<sub>num</sub>, gl<sub>den</sub>), p-valor, y al menos un estimador del tamaño del efecto (ω² preferido). Ejemplo: <em>F(2, 144) = 42.31, p &lt; 0.001, ω² = 0.36</em>, lo que indica un efecto grande del nivel de protección sobre la biomasa.
+                </div>
+            </div>
+        </section>
+
+        <!-- TEORÍA 5 -->
+        <section id="teoria-ejemplo">
+            <div class="card" style="font-size: 0.95rem; line-height: 1.7;">
+                <h2 class="section-title"><span class="badge">Teoría 5</span> Ejemplo Aplicado Interpretado: AMP del Pacífico Costarricense</h2>
+
+                <h4>1. Planteamiento</h4>
+                <p>Se midió la biomasa de peces (kg/100m²) en 150 transectos submarinos distribuidos en un diseño factorial balanceado: 3 niveles de protección × 2 estaciones × 25 réplicas por celda.</p>
+
+                <h4 style="margin-top: 1rem;">2. Tabla ANOVA Simulada (Output de statsmodels)</h4>
+                <div class="code-container" style="background-color: var(--bg-color); padding: 1rem; border-radius: 8px; font-family: 'Fira Code', monospace; overflow-x: auto;">
+<pre style="margin: 0; font-size: 0.85rem; color: #a9b7c6;">
+                 sum_sq    df           F         PR(>F)
+C(proteccion)  9814.23   2.0   87.46      8.41e-27  ***
+C(estacion)    1523.61   1.0   27.17      5.12e-07  ***
+Interaction     124.18   2.0    1.107      0.3325
+Residual       8078.40  144.0
+
+Levene Test: F = 1.21, p = 0.301  → Homocedasticidad OK
+Shapiro-Wilk (residuos): W = 0.992, p = 0.543  → Normalidad OK
+</pre>
+                </div>
+
+                <h4 style="margin-top: 1.5rem;">3. Interpretación Metodológica</h4>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Efecto del Nivel de Protección (Factor A):</strong> Altamente significativo, F(2, 144) = 87.46, p &lt; 0.001. Los tres tipos de zona difieren en biomasa. El tamaño del efecto η² = 9814.23 / (9814.23 + 1523.61 + 124.18 + 8078.40) = 0.501 indica un efecto de magnitud grande.</li>
+                    <li><strong>Efecto de la Estación (Factor B):</strong> Significativo, F(1, 144) = 27.17, p &lt; 0.001. La biomasa es significativamente mayor durante la temporada lluviosa. η² parcial = 0.159 (efecto mediano-grande).</li>
+                    <li><strong>Interacción A×B:</strong> No significativa, F(2, 144) = 1.107, p = 0.332. El efecto diferencial de la protección sobre la biomasa opera de manera similar en ambas estaciones. Los efectos principales son, por tanto, directamente interpretables.</li>
+                    <li><strong>Post-hoc Tukey HSD:</strong> AMP_Total &gt; AMP_Parcial (diferencia ≈ 15 kg/100m², p &lt; 0.001), AMP_Parcial &gt; Acceso_Libre (diferencia ≈ 12 kg/100m², p &lt; 0.001), AMP_Total &gt; Acceso_Libre (diferencia ≈ 27 kg/100m², p &lt; 0.001).</li>
+                </ol>
+
+                <div class="alert alert-success">
+                    <strong>Conclusión de Gestión:</strong> La protección total es estadísticamente superior a la protección parcial y al acceso libre en términos de biomasa de peces, con efecto consistente en ambas estaciones. Esto provee evidencia empírica sólida a favor de las zonas núcleo sin pesca en el diseño de AMPs del Pacífico costarricense.
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 1 -->
+        <section id="modulo1">
+            <div class="card">
+                <h2 class="section-title"><span class="badge">Módulo 1</span> Generación de Datos y Entorno</h2>
+                <p>Preparamos el entorno y construimos un <strong>Proceso Generador de Datos (DGP)</strong> para un diseño factorial balanceado 3×2. Las medias verdaderas de cada celda representan el "mundo real" que intentaremos recuperar mediante ANOVA.</p>
+
+                <div class="code-container">
+                    <button class="copy-btn no-print">Copiar Código</button>
+                    <pre><code class="language-python"># ============================================================
+# LABORATORIO ANOVA - GESTIÓN DE ÁREAS MARINAS PROTEGIDAS
+# Diseño: 3 Niveles de Protección × 2 Estaciones (n=25/celda)
+# ============================================================
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from scipy.stats import shapiro, levene, f_oneway, kruskal
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.stats.anova import anova_lm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+import warnings
+
+warnings.filterwarnings("ignore")
+pd.set_option("display.max_columns", 20)
+np.random.seed(2026)
+
+try:
+    plt.style.use('seaborn-v0_8-darkgrid')
+except:
+    plt.style.use('ggplot')
+
+# -----------------------------------------------------------
+# DISEÑO EXPERIMENTAL (DGP verdadero)
+# Factor A: Nivel de Protección (3 niveles)
+# Factor B: Estación Climática (2 niveles)
+# Y: Biomasa de peces (kg/100m²)
+# -----------------------------------------------------------
+def generate_anova_data(n_per_group=25, seed=2026):
+    rng = np.random.default_rng(seed)
+    sigma_within = 6.0  # Desv. estándar intragrupo (homocedasticidad)
+
+    # Medias verdaderas por celda (refleja el DGP)
+    diseno = {
+        ('AMP_Total',   'Seca'):     45.0,
+        ('AMP_Total',   'Lluviosa'): 52.0,
+        ('AMP_Parcial', 'Seca'):     30.0,
+        ('AMP_Parcial', 'Lluviosa'): 35.0,
+        ('Libre',       'Seca'):     18.0,
+        ('Libre',       'Lluviosa'): 21.0,
+    }
+
+    registros = []
+    for (proteccion, estacion), mu in diseno.items():
+        biomasa = rng.normal(mu, sigma_within, n_per_group)
+        biomasa = np.maximum(biomasa, 1.0)  # No negativos
+        for val in biomasa:
+            registros.append({
+                'proteccion': proteccion,
+                'estacion':   estacion,
+                'biomasa':    round(float(val), 2)
+            })
+
+    df = pd.DataFrame(registros)
+    df['proteccion'] = pd.Categorical(
+        df['proteccion'],
+        categories=['AMP_Total', 'AMP_Parcial', 'Libre'],
+        ordered=True
+    )
+    return df
+
+df = generate_anova_data()
+
+print("=== ESTRUCTURA DEL DATASET ===")
+print(f"Dimensiones: {df.shape}")
+print(f"Variables: {df.columns.tolist()}")
+print(f"\nDistribución por celdas (n=25/celda):")
+print(df.groupby(['proteccion', 'estacion'], observed=True)['biomasa']
+       .agg(n='count', media='mean', de='std')
+       .round(2))
+
+print(f"\nEstadísticos globales:")
+print(df['biomasa'].describe().round(2))</code></pre>
+                </div>
+
+                <div class="student-workspace">
+                    <div class="workspace-field">
+                        <label>Pega aquí la salida de la consola (tabla de medias por celda):</label>
+                        <div class="editable-area" contenteditable="true" placeholder="Pega el output de Colab aquí..."></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Interpretación del diseño experimental:</label>
+                        <div class="editable-area interpretation-area" contenteditable="true" placeholder="Describe la estructura del diseño: ¿cuántos factores, cuántos niveles, cuántas observaciones por celda? ¿Cómo se ven las medias a nivel descriptivo entre grupos?"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 2 -->
+        <section id="modulo2">
+            <div class="card">
+                <h2 class="section-title"><span class="badge">Módulo 2</span> ANOVA Unifactorial: Efecto del Nivel de Protección</h2>
+                <p>Primero analizamos únicamente el efecto del Factor A (protección), ignorando la estación. Esto nos da la tabla ANOVA básica y la significancia global del factor de tratamiento.</p>
+
+                <div class="code-container">
+                    <button class="copy-btn no-print">Copiar Código</button>
+                    <pre><code class="language-python"># ============================================================
+# ANOVA UNIFACTORIAL: Nivel de Protección → Biomasa
+# ============================================================
+
+# Extraer grupos como listas separadas
+grupos = {nivel: grupo['biomasa'].values
+          for nivel, grupo in df.groupby('proteccion', observed=True)}
+
+# --- MÉTODO 1: scipy (rápido) ---
+F_stat, p_valor = f_oneway(*grupos.values())
+print(f"F({len(grupos)-1}, {len(df)-len(grupos)}) = {F_stat:.4f}, p = {p_valor:.6f}")
+
+# --- MÉTODO 2: statsmodels (tabla ANOVA completa) ---
+modelo_1via = smf.ols('biomasa ~ C(proteccion)', data=df).fit()
+tabla_1via  = anova_lm(modelo_1via, typ=1)
+print("\n=== TABLA ANOVA UNIFACTORIAL ===")
+print(tabla_1via.round(4))
+
+# --- ESTADÍSTICOS DESCRIPTIVOS POR GRUPO ---
+print("\n=== MEDIAS POR NIVEL DE PROTECCIÓN (con IC 95%) ===")
+resumen = df.groupby('proteccion', observed=True)['biomasa'].agg(
+    n='count', media='mean', de='std',
+    ic_lower=lambda x: x.mean() - 1.96*(x.std()/np.sqrt(len(x))),
+    ic_upper=lambda x: x.mean() + 1.96*(x.std()/np.sqrt(len(x)))
+).round(3)
+print(resumen)
+
+# --- VISUALIZACIÓN: BOXPLOT + STRIPPLOT ---
+fig, ax = plt.subplots(figsize=(9, 6))
+sns.boxplot(x='proteccion', y='biomasa', data=df,
+            palette=['#1b7837','#fdb863','#e08214'],
+            order=['AMP_Total','AMP_Parcial','Libre'], ax=ax)
+sns.stripplot(x='proteccion', y='biomasa', data=df,
+              color='black', alpha=0.3, size=4,
+              order=['AMP_Total','AMP_Parcial','Libre'], ax=ax)
+ax.set_title(f'Biomasa por Nivel de Protección\nF = {F_stat:.2f}, p = {p_valor:.4f}', fontsize=13)
+ax.set_xlabel('Nivel de Protección Marina')
+ax.set_ylabel('Biomasa (kg/100m²)')
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+
+                <div class="student-workspace">
+                    <div class="workspace-field">
+                        <label>Sube el boxplot generado:</label>
+                        <input type="file" accept="image/*" class="image-upload no-print" onchange="previewImage(event, this)">
+                        <div class="image-preview"></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Pega la tabla ANOVA unifactorial completa:</label>
+                        <div class="editable-area" contenteditable="true" placeholder="Pega la tabla ANOVA aquí..."></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Interpretación del ANOVA unifactorial:</label>
+                        <div class="editable-area interpretation-area" contenteditable="true" placeholder="Interpreta el estadístico F, los grados de libertad y el p-valor. ¿Es significativo? ¿Qué concluyes sobre el efecto del nivel de protección? ¿Qué NO te dice todavía la prueba F?"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 3 -->
+        <section id="modulo3">
+            <div class="card">
+                <h2 class="section-title"><span class="badge">Módulo 3</span> ANOVA Factorial 3×2: Protección × Estación e Interacción</h2>
+                <p>Incorporamos el segundo factor (estación) y su posible interacción con la protección. El gráfico de interacción es clave: si las líneas NO son paralelas, la interacción es relevante.</p>
+
+                <div class="code-container">
+                    <button class="copy-btn no-print">Copiar Código</button>
+                    <pre><code class="language-python"># ============================================================
+# ANOVA FACTORIAL 3×2 CON INTERACCIÓN
+# Tipo II: adecuado para factores no ortogonales (recomendado)
+# ============================================================
+
+modelo_2via = smf.ols('biomasa ~ C(proteccion) * C(estacion)', data=df).fit()
+tabla_2via  = anova_lm(modelo_2via, typ=2)
+
+print("=== TABLA ANOVA FACTORIAL (Tipo II) ===")
+print(tabla_2via.round(4))
+
+# --- CÁLCULO DE η² PARCIAL POR FACTOR ---
+SS_A    = tabla_2via.loc['C(proteccion)',        'sum_sq']
+SS_B    = tabla_2via.loc['C(estacion)',          'sum_sq']
+SS_AB   = tabla_2via.loc['C(proteccion):C(estacion)', 'sum_sq']
+SS_E    = tabla_2via.loc['Residual',             'sum_sq']
+
+eta2_A  = SS_A  / (SS_A  + SS_E)
+eta2_B  = SS_B  / (SS_B  + SS_E)
+eta2_AB = SS_AB / (SS_AB + SS_E)
+
+print(f"\n=== TAMAÑO DEL EFECTO (η² parcial) ===")
+print(f"η²p Factor A (Protección):  {eta2_A:.4f}  ({'Grande' if eta2_A>=0.14 else 'Mediano' if eta2_A>=0.06 else 'Pequeño'})")
+print(f"η²p Factor B (Estación):    {eta2_B:.4f}  ({'Grande' if eta2_B>=0.14 else 'Mediano' if eta2_B>=0.06 else 'Pequeño'})")
+print(f"η²p Interacción A×B:        {eta2_AB:.4f} ({'Grande' if eta2_AB>=0.14 else 'Mediano' if eta2_AB>=0.06 else 'Pequeño'})")
+
+# --- GRÁFICO DE INTERACCIÓN ---
+medias_celda = df.groupby(['proteccion', 'estacion'], observed=True)['biomasa'].mean().reset_index()
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Gráfico de interacción (líneas)
+for estacion, color in zip(['Seca', 'Lluviosa'], ['#e08214', '#1b7837']):
+    sub = medias_celda[medias_celda['estacion'] == estacion]
+    axes[0].plot(sub['proteccion'].astype(str), sub['biomasa'],
+                 marker='o', label=f'Estación {estacion}', color=color, linewidth=2.5)
+axes[0].set_title('Gráfico de Interacción: Protección × Estación', fontsize=12)
+axes[0].set_xlabel('Nivel de Protección')
+axes[0].set_ylabel('Biomasa media (kg/100m²)')
+axes[0].legend()
+axes[0].grid(True, alpha=0.4)
+
+# Boxplot factorial
+sns.boxplot(x='proteccion', y='biomasa', hue='estacion', data=df,
+            palette=['#fdb863', '#1b7837'],
+            order=['AMP_Total', 'AMP_Parcial', 'Libre'], ax=axes[1])
+axes[1].set_title('Distribución Factorial por Celdas', fontsize=12)
+axes[1].set_xlabel('Nivel de Protección')
+axes[1].set_ylabel('Biomasa (kg/100m²)')
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+
+                <div class="student-workspace">
+                    <div class="workspace-field">
+                        <label>Sube el gráfico de interacción y el boxplot factorial:</label>
+                        <input type="file" accept="image/*" class="image-upload no-print" onchange="previewImage(event, this)">
+                        <div class="image-preview"></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Pega la tabla ANOVA factorial completa:</label>
+                        <div class="editable-area" contenteditable="true" placeholder="Pega la tabla de statsmodels aquí..."></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Interpretación del ANOVA factorial:</label>
+                        <div class="editable-area interpretation-area" contenteditable="true" placeholder="¿Son significativos el Factor A, Factor B y la interacción? Interpreta el gráfico de interacción: ¿las líneas son aproximadamente paralelas? ¿Qué implica esto para la interpretación de los efectos principales? Reporta los η² parciales."></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 4 -->
+        <section id="modulo4">
+            <div class="card">
+                <h2 class="section-title"><span class="badge">Módulo 4</span> Diagnóstico Formal de Supuestos</h2>
+                <p>Verificamos empíricamente los tres supuestos del ANOVA: normalidad de residuos (Shapiro-Wilk), homocedasticidad entre grupos (Levene) e inspección visual con gráficos diagnósticos.</p>
+
+                <div class="code-container">
+                    <button class="copy-btn no-print">Copiar Código</button>
+                    <pre><code class="language-python"># ============================================================
+# DIAGNÓSTICO COMPLETO DE SUPUESTOS ANOVA
+# ============================================================
+
+resid   = modelo_2via.resid
+fitted  = modelo_2via.fittedvalues
+
+# --- 1. HOMOCEDASTICIDAD: Prueba de Levene ---
+grupos_lista = [g['biomasa'].values
+                for _, g in df.groupby('proteccion', observed=True)]
+L_stat, L_p = levene(*grupos_lista)
+print(f"Levene (Homocedasticidad): F = {L_stat:.4f}, p = {L_p:.4f}",
+      "→ OK (varianzas homogéneas)" if L_p > 0.05 else "→ VIOLADO (usar Welch/Games-Howell)")
+
+# --- 2. NORMALIDAD: Shapiro-Wilk por grupo ---
+print("\nShapiro-Wilk por nivel de protección:")
+for nivel, grupo in df.groupby('proteccion', observed=True):
+    W, p_sw = shapiro(grupo['biomasa'])
+    estado  = "OK" if p_sw > 0.05 else "REVISAR"
+    print(f"  {nivel:12s}: W = {W:.4f}, p = {p_sw:.4f}  [{estado}]")
+
+# Shapiro-Wilk sobre residuos del modelo factorial
+W_resid, p_resid = shapiro(resid)
+print(f"\nShapiro-Wilk (residuos modelo factorial): W = {W_resid:.4f}, p = {p_resid:.4f}",
+      "→ OK" if p_resid > 0.05 else "→ VIOLADO")
+
+# --- 3. VISUALIZACIÓN DIAGNÓSTICA ---
+fig, axes = plt.subplots(2, 2, figsize=(14, 11))
+
+# A. Residuos vs Valores ajustados (Homocedasticidad)
+axes[0,0].scatter(fitted, resid, alpha=0.5, color='steelblue')
+axes[0,0].axhline(0, color='red', linestyle='--')
+axes[0,0].set_title('1. Residuos vs Valores Ajustados\n(Homocedasticidad)', fontsize=11)
+axes[0,0].set_xlabel('Valores Ajustados (Medias de grupo)')
+axes[0,0].set_ylabel('Residuos')
+
+# B. Q-Q Plot normalidad de residuos
+sm.qqplot(resid, line='45', fit=True, ax=axes[0,1], alpha=0.5)
+axes[0,1].set_title('2. Q-Q Plot de Residuos\n(Normalidad)', fontsize=11)
+
+# C. Histograma de residuos
+axes[1,0].hist(resid, bins=20, color='steelblue', edgecolor='white', alpha=0.85)
+axes[1,0].axvline(0, color='red', linestyle='--')
+mu_r, std_r = resid.mean(), resid.std()
+x_norm = np.linspace(resid.min(), resid.max(), 200)
+axes[1,0].plot(x_norm, stats.norm.pdf(x_norm, mu_r, std_r) * len(resid) * (resid.max()-resid.min())/20,
+               'r-', linewidth=2)
+axes[1,0].set_title('3. Distribución de Residuos\n(Campaniforme = OK)', fontsize=11)
+axes[1,0].set_xlabel('Residuos')
+axes[1,0].set_ylabel('Frecuencia')
+
+# D. Boxplot de residuos por nivel de protección
+df_diag = df.copy()
+df_diag['residuos'] = resid.values
+sns.boxplot(x='proteccion', y='residuos', data=df_diag,
+            order=['AMP_Total','AMP_Parcial','Libre'],
+            palette=['#1b7837','#fdb863','#e08214'], ax=axes[1,1])
+axes[1,1].axhline(0, color='red', linestyle='--')
+axes[1,1].set_title('4. Residuos por Grupo\n(Varianza similar = OK)', fontsize=11)
+axes[1,1].set_xlabel('Nivel de Protección')
+axes[1,1].set_ylabel('Residuos del Modelo Factorial')
+
+plt.tight_layout()
+plt.show()
+
+# --- 4. ALTERNATIVA NO PARAMÉTRICA (si supuestos fallan) ---
+print("\n=== KRUSKAL-WALLIS (Alternativa no paramétrica) ===")
+H_stat, H_p = kruskal(*grupos_lista)
+print(f"H = {H_stat:.4f}, p = {H_p:.6f}  (Usar si Levene o Shapiro son significativos)")</code></pre>
+                </div>
+
+                <div class="student-workspace">
+                    <div class="workspace-field">
+                        <label>Sube el panel diagnóstico (4 gráficos):</label>
+                        <input type="file" accept="image/*" class="image-upload no-print" onchange="previewImage(event, this)">
+                        <div class="image-preview"></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Pega los resultados de las pruebas formales (Levene y Shapiro-Wilk):</label>
+                        <div class="editable-area" contenteditable="true" placeholder="Pega los p-valores aquí..."></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Diagnóstico e Interpretación:</label>
+                        <div class="editable-area interpretation-area" contenteditable="true" placeholder="Para cada supuesto, declara si se cumple o se viola. Basa tu conclusión tanto en las pruebas formales (p-valores) como en la inspección visual. ¿Procede el ANOVA paramétrico o es necesaria la alternativa de Kruskal-Wallis?"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 5 -->
+        <section id="modulo5">
+            <div class="card">
+                <h2 class="section-title"><span class="badge">Módulo 5</span> Comparaciones Múltiples Post-hoc y Tamaño del Efecto</h2>
+                <p>Con un ANOVA significativo, procedemos a identificar <em>qué pares de grupos difieren</em> mediante Tukey HSD, y cuantificamos la relevancia práctica del efecto con ω² (estimador insesgado) y η² parcial.</p>
+
+                <div class="code-container">
+                    <button class="copy-btn no-print">Copiar Código</button>
+                    <pre><code class="language-python"># ============================================================
+# POST-HOC: TUKEY HSD + TAMAÑO DEL EFECTO (ω², η²p)
+# ============================================================
+
+# --- 1. TUKEY HSD (Comparaciones por pares, Factor A) ---
+tukey = pairwise_tukeyhsd(
+    endog=df['biomasa'],
+    groups=df['proteccion'],
+    alpha=0.05
+)
+print("=== COMPARACIONES MÚLTIPLES: TUKEY HSD ===")
+print(tukey.summary())
+
+# --- 2. VISUALIZACIÓN: INTERVALOS DE CONFIANZA TUKEY ---
+fig, axes = plt.subplots(1, 2, figsize=(15, 5))
+
+tukey.plot_simultaneous(ax=axes[0], figsize=(6, 4))
+axes[0].set_title('Intervalos de Confianza Tukey HSD\n(Sin solapamiento = Diferencia significativa)')
+axes[0].set_xlabel('Biomasa (kg/100m²)')
+
+# --- 3. GRÁFICO DE MEDIAS CON IC 95% ---
+resumen = df.groupby('proteccion', observed=True)['biomasa'].agg(
+    media='mean',
+    se=lambda x: x.std() / np.sqrt(len(x))
+).reset_index()
+
+colores = {'AMP_Total': '#1b7837', 'AMP_Parcial': '#fdb863', 'Libre': '#e08214'}
+for i, row in resumen.iterrows():
+    axes[1].bar(row['proteccion'], row['media'],
+                yerr=1.96*row['se'], capsize=10,
+                color=colores[row['proteccion']], alpha=0.8, edgecolor='black')
+axes[1].set_title('Medias por Grupo con IC 95%\n(Barras no solapadas = Diferencia)', fontsize=11)
+axes[1].set_ylabel('Biomasa (kg/100m²)')
+axes[1].set_xlabel('Nivel de Protección')
+
+plt.tight_layout()
+plt.show()
+
+# --- 4. TAMAÑO DEL EFECTO: ω² (insesgado) y η²p ---
+k       = df['proteccion'].nunique()
+N       = len(df)
+SS_A_1  = tabla_1via.loc['C(proteccion)', 'sum_sq']
+SS_E_1  = tabla_1via.loc['Residual',      'sum_sq']
+MS_E_1  = tabla_1via.loc['Residual',      'mean_sq']
+SS_T_1  = SS_A_1 + SS_E_1
+
+eta2    = SS_A_1 / SS_T_1
+omega2  = (SS_A_1 - (k-1)*MS_E_1) / (SS_T_1 + MS_E_1)
+
+print(f"\n=== TAMAÑO DEL EFECTO (Factor Protección) ===")
+print(f"η²  (eta-cuadrado, sesgado):   {eta2:.4f}  {'[Grande]' if eta2>=0.14 else '[Mediano]' if eta2>=0.06 else '[Pequeño]'}")
+print(f"ω²  (omega-cuadrado, insesgado): {omega2:.4f} {'[Grande]' if omega2>=0.14 else '[Mediano]' if omega2>=0.06 else '[Pequeño]'}")
+print(f"R²  del modelo unifactorial:    {modelo_1via.rsquared:.4f}")
+
+# --- 5. DIFERENCIAS ENTRE PARES (Cohen's d aproximado) ---
+print(f"\n=== DIFERENCIAS DE MEDIAS POR PAR ===")
+niveles = ['AMP_Total', 'AMP_Parcial', 'Libre']
+for i in range(len(niveles)):
+    for j in range(i+1, len(niveles)):
+        g1 = df[df['proteccion']==niveles[i]]['biomasa']
+        g2 = df[df['proteccion']==niveles[j]]['biomasa']
+        pooled_sd = np.sqrt(((len(g1)-1)*g1.var() + (len(g2)-1)*g2.var()) / (len(g1)+len(g2)-2))
+        d = (g1.mean() - g2.mean()) / pooled_sd
+        print(f"  {niveles[i]:12s} vs {niveles[j]:12s}: Δ = {g1.mean()-g2.mean():+.2f} kg/100m², d = {d:.3f}")</code></pre>
+                </div>
+
+                <div class="student-workspace">
+                    <div class="workspace-field">
+                        <label>Sube el gráfico de Tukey HSD y el de medias con IC:</label>
+                        <input type="file" accept="image/*" class="image-upload no-print" onchange="previewImage(event, this)">
+                        <div class="image-preview"></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Pega la tabla de Tukey HSD y los tamaños de efecto:</label>
+                        <div class="editable-area" contenteditable="true" placeholder="Pega los resultados post-hoc aquí..."></div>
+                    </div>
+                    <div class="workspace-field">
+                        <label>Conclusión Integrada del Análisis (Reporte de Resultados):</label>
+                        <div class="editable-area interpretation-area" contenteditable="true" placeholder="Redacta un párrafo de resultados integrado al estilo de un artículo científico. Incluye: (a) el resultado del ANOVA (F, gl, p), (b) cuáles pares difieren según Tukey HSD, (c) el tamaño del efecto con su interpretación (ω²), y (d) la implicación de gestión marina de estos hallazgos."></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // Funcionalidad copiar código
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const pre = button.nextElementSibling;
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const orig = button.innerText;
+                    button.innerText = '¡Copiado!';
+                    button.classList.add('copied');
+                    setTimeout(() => { button.innerText = orig; button.classList.remove('copied'); }, 2000);
+                });
+            });
+        });
+
+        // Resaltado de navegación por scroll
+        const sections = document.querySelectorAll('section, header');
+        const navLinks = document.querySelectorAll('.nav-links a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= (s.offsetTop - 150)) current = s.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) link.classList.add('active');
+            });
+        });
+
+        // Previsualización de imágenes
+        function previewImage(event, inputElement) {
+            const container = inputElement.nextElementSibling;
+            container.innerHTML = '';
+            const files = event.target.files;
+            if (files && files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    const btn = document.createElement('button');
+                    btn.innerText = 'Eliminar Imagen';
+                    btn.className = 'remove-img-btn no-print';
+                    btn.onclick = () => { inputElement.value = ''; container.innerHTML = ''; };
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    container.appendChild(wrapper);
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        // Exportar PDF
+        function exportToPDF() {
+            const btn = document.querySelector('.btn-export');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '⏳ Generando PDF...';
+            btn.disabled = true;
+            const element = document.getElementById('lab-content');
+            const opt = {
+                margin: 0.5,
+                filename: 'Laboratorio_ANOVA_Entregable.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }).catch(() => {
+                btn.innerHTML = '❌ Error';
+                setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

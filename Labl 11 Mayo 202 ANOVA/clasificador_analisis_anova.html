@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clasificador de Diseños ANOVA — Sprint 3</title>
+  <style>
+    :root {
+      --azul-ucr: #005da4;
+      --azul-claro: #e8f3fb;
+      --gris-fondo: #f4f6f8;
+      --gris-borde: #d7dee5;
+      --texto: #1f2933;
+      --verde: #1b8a5a;
+      --amarillo: #b7791f;
+      --rojo: #b83232;
+      --morado: #5b4b8a;
+      --blanco: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--gris-fondo);
+      color: var(--texto);
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--azul-ucr), #003f73);
+      color: white;
+      padding: 28px 36px;
+      border-bottom: 6px solid #f2c94c;
+    }
+
+    header h1 { margin: 0 0 8px; font-size: 2rem; }
+    header p  { max-width: 1100px; margin: 0; opacity: .95; }
+
+    main {
+      max-width: 1280px;
+      margin: 28px auto;
+      padding: 0 20px 40px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--blanco);
+      border: 1px solid var(--gris-borde);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      margin-bottom: 22px;
+    }
+
+    .card h2 { color: var(--azul-ucr); margin-top: 0; border-bottom: 2px solid var(--azul-claro); padding-bottom: 8px; font-size: 1.35rem; }
+    .card h3 { color: #003f73; margin-top: 22px; font-size: 1.08rem; }
+
+    label { display: block; font-weight: bold; margin: 12px 0 6px; }
+
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #b9c4cf;
+      border-radius: 10px;
+      font-size: .95rem;
+      background: white;
+      color: var(--texto);
+    }
+
+    textarea { min-height: 82px; resize: vertical; }
+
+    .row   { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    @media (max-width: 720px) { .row, .row-3 { grid-template-columns: 1fr; } }
+
+    .radio-grid, .check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .option {
+      border: 1px solid var(--gris-borde);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfdff;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .option input { transform: scale(1.1); }
+
+    .factor-tag {
+      border: 1px dashed #9db4c8;
+      background: #fbfdff;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: .2s ease;
+      font-size: .95rem;
+    }
+
+    button.primary   { background: var(--azul-ucr); color: white; }
+    button.secondary { background: #e6edf3; color: #233; }
+    button.warning   { background: #f6ad55; color: #2d1600; }
+
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,.10); }
+
+    .result-panel { position: sticky; top: 18px; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: bold;
+      font-size: .85rem;
+      margin: 4px 4px 4px 0;
+    }
+
+    .badge.green  { background: #dff5e8; color: var(--verde); }
+    .badge.yellow { background: #fff4d6; color: var(--amarillo); }
+    .badge.red    { background: #fde2e2; color: var(--rojo); }
+    .badge.blue   { background: var(--azul-claro); color: var(--azul-ucr); }
+    .badge.purple { background: #eee9ff; color: var(--morado); }
+
+    .classification {
+      border-left: 6px solid var(--azul-ucr);
+      background: var(--azul-claro);
+      padding: 14px;
+      border-radius: 12px;
+      margin: 12px 0;
+    }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+      border: 1px solid transparent;
+    }
+
+    .alert.ok     { background: #eefaf3; border-color: #b7e4c7; }
+    .alert.warn   { background: #fff8e1; border-color: #f5d57a; }
+    .alert.danger { background: #fdecec; border-color: #f5b5b5; }
+
+    .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eef2f6; }
+    .checklist-item input { margin-top: 5px; }
+
+    .small { font-size: .88rem; color: #52616f; }
+
+    .code-block {
+      background: #1f2933;
+      color: #e6edf3;
+      padding: 14px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: .85rem;
+      white-space: pre-wrap;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .test-box { background: #f8fafc; border: 1px solid var(--gris-borde); border-radius: 12px; padding: 10px 12px; margin-top: 14px; font-size: .86rem; }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .92rem; }
+    th, td { border: 1px solid var(--gris-borde); padding: 9px; text-align: left; vertical-align: top; }
+    th { background: var(--azul-claro); color: #003f73; }
+
+    .print-note { display: none; }
+
+    @media print {
+      body { background: white; }
+      header, .actions, .no-print, .test-box { display: none !important; }
+      main { display: block; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .result-panel { position: static; }
+      .print-note { display: block; font-weight: bold; margin-bottom: 12px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Clasificador de Diseños ANOVA — Sprint 3</h1>
+  <p>Herramienta para identificar el diseño ANOVA apropiado según la pregunta de investigación, la estructura de los factores y los datos disponibles. Recibe recomendación metodológica, alertas estadísticas, checklist y plantilla de código.</p>
+</header>
+
+<main>
+  <div style="grid-column: 1 / -1; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+    <a href="index.html" style="display: inline-block; padding: 10px 16px; background-color: #003f73; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem;">← Volver al Laboratorio Principal</a>
+    <a href="instrumento_simulacion_anova.html" style="display: inline-block; padding: 10px 16px; background-color: var(--azul-ucr); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem;">🛠️ Ir al Instrumento de Simulación →</a>
+  </div>
+
+  <section>
+    <!-- Pregunta de investigación -->
+    <div class="card">
+      <h2>1. Pregunta de investigación</h2>
+      <label for="pregunta">Pregunta orientadora</label>
+      <textarea id="pregunta">¿Difieren significativamente las medias de mi variable de respuesta entre los niveles del factor o factores de interés?</textarea>
+
+      <label for="area">Área del problema</label>
+      <select id="area">
+        <option value="ecologia">Ecología / Biología marina</option>
+        <option value="salud">Salud / Ciencias biomédicas</option>
+        <option value="educativa">Educativa / Psicológica</option>
+        <option value="agronomia">Agronomía / Ciencias del suelo</option>
+        <option value="ingenieria">Ingeniería / Calidad</option>
+        <option value="socioeconomica">Socio-económica</option>
+        <option value="otra">Otra</option>
+      </select>
+    </div>
+
+    <!-- Variable respuesta -->
+    <div class="card">
+      <h2>2. Variable de respuesta (Y)</h2>
+
+      <label for="yNombre">Nombre de Y</label>
+      <input type="text" id="yNombre" placeholder="Ejemplo: biomasa, puntuación, rendimiento, concentración" />
+
+      <label for="yUnidad">Unidades</label>
+      <input type="text" id="yUnidad" placeholder="Ejemplo: kg/100m², puntos, mg/L, cm" />
+
+      <label>Tipo de variable Y</label>
+      <div class="radio-grid">
+        <label class="option"><input type="radio" name="yTipo" value="continua" checked /> Continua</label>
+        <label class="option"><input type="radio" name="yTipo" value="conteo" /> Conteo</label>
+        <label class="option"><input type="radio" name="yTipo" value="proporcion" /> Proporción / Porcentaje</label>
+        <label class="option"><input type="radio" name="yTipo" value="ordinal" /> Ordinal (escala Likert, rango)</label>
+      </div>
+
+      <label style="margin-top:12px;">Distribución esperada dentro de cada grupo</label>
+      <div class="radio-grid">
+        <label class="option"><input type="radio" name="yDist" value="normal" checked /> Normal / simétrica</label>
+        <label class="option"><input type="radio" name="yDist" value="sesgada" /> Sesgada positiva</label>
+        <label class="option"><input type="radio" name="yDist" value="bimodal" /> Bimodal / multimodal</label>
+        <label class="option"><input type="radio" name="yDist" value="desconocida" /> Desconocida</label>
+      </div>
+    </div>
+
+    <!-- Factores -->
+    <div class="card">
+      <h2>3. Factores (variables independientes categóricas)</h2>
+      <p class="small">Defina cada factor del diseño: nombre, número de niveles, tipo (entre-sujetos o dentro-sujetos) y justificación teórica.</p>
+
+      <div id="contenedorFactores"></div>
+
+      <div class="actions">
+        <button class="secondary" type="button" onclick="agregarFactor()">+ Agregar otro factor</button>
+      </div>
+    </div>
+
+    <!-- Datos disponibles -->
+    <div class="card">
+      <h2>4. Datos disponibles y problemas conocidos</h2>
+
+      <label>Estructura del diseño</label>
+      <div class="radio-grid">
+        <label class="option"><input type="radio" name="estructura" value="between" checked /> Entre-sujetos (each unit in one group)</label>
+        <label class="option"><input type="radio" name="estructura" value="within" /> Dentro-sujetos (medidas repetidas)</label>
+        <label class="option"><input type="radio" name="estructura" value="mixed" /> Mixto (between + within)</label>
+        <label class="option"><input type="radio" name="estructura" value="bloques" /> Bloques aleatorizados (DBCA)</label>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div>
+          <label for="nPorGrupo">N estimado por grupo/celda</label>
+          <input type="number" id="nPorGrupo" placeholder="Ejemplo: 20" />
+        </div>
+        <div>
+          <label for="balanceado">¿Diseño balanceado?</label>
+          <select id="balanceado">
+            <option value="si">Sí (igual n en todos los grupos)</option>
+            <option value="no">No (n desiguales)</option>
+            <option value="desconocido">Por definir</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="margin-top:12px;">Problemas conocidos</label>
+      <div class="check-grid">
+        <label class="option"><input type="checkbox" id="probHetero" /> Varianzas posiblemente desiguales</label>
+        <label class="option"><input type="checkbox" id="probNoNormal" /> Distribución no normal intragrupo</label>
+        <label class="option"><input type="checkbox" id="probPequenoN" /> N pequeño (&lt; 10 por grupo)</label>
+        <label class="option"><input type="checkbox" id="probOutliers" /> Outliers conocidos</label>
+        <label class="option"><input type="checkbox" id="probDependencia" /> Observaciones dependientes / agrupadas</label>
+        <label class="option"><input type="checkbox" id="probCovariable" /> Hay covariable numérica importante (→ ANCOVA)</label>
+      </div>
+
+      <label for="notasTexto" style="margin-top:12px;">Notas adicionales</label>
+      <textarea id="notasTexto" placeholder="Restricciones del diseño, medición aproximada, aspectos no controlados..."></textarea>
+
+      <div class="actions">
+        <button class="primary" type="button" onclick="clasificar()">🔍 Clasificar diseño y recomendar análisis</button>
+        <button class="secondary" type="button" onclick="limpiar()">Limpiar</button>
+        <button class="warning" type="button" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel de resultados -->
+  <aside class="result-panel">
+    <div class="card">
+      <p class="print-note">Reporte generado por el Clasificador de Diseños ANOVA — Sprint 3</p>
+      <h2>Recomendación personalizada</h2>
+      <div id="resultadoInicial" class="alert warn">
+        Complete la ficha y presione <strong>Clasificar diseño</strong> para generar la recomendación.
+      </div>
+      <div id="resultadoClasificacion"></div>
+      <div id="resultadoChecklist"></div>
+      <div id="resultadoCodigo"></div>
+      <div id="resultadoTests" class="test-box no-print"></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  let contadorFactores = 0;
+
+  function escapar(t) {
+    return String(t)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;');
+  }
+
+  function limpiarId(s) {
+    return (s||'').trim().normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-zA-Z0-9_]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') || 'var';
+  }
+
+  function getRadio(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : '';
+  }
+
+  function agregarFactor(nombre='', niveles='3', tipo='between', justif='') {
+    contadorFactores++;
+    const cont = document.getElementById('contenedorFactores');
+    const div  = document.createElement('div');
+    div.className = 'factor-tag';
+    div.dataset.idx = contadorFactores;
+    div.innerHTML = `
+      <h3>Factor ${contadorFactores}</h3>
+      <div class="row">
+        <div>
+          <label>Nombre del factor</label>
+          <input type="text" class="fNombre" placeholder="Ejemplo: proteccion, tratamiento, especie" value="${escapar(nombre)}">
+        </div>
+        <div>
+          <label>Número de niveles (k)</label>
+          <input type="number" class="fNiveles" value="${niveles}" min="2" max="10">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Estructura de medición</label>
+          <select class="fTipo">
+            <option value="between" ${tipo==='between'?'selected':''}>Entre-sujetos (between)</option>
+            <option value="within"  ${tipo==='within'?'selected':''}>Dentro-sujetos (within / medidas repetidas)</option>
+          </select>
+        </div>
+        <div>
+          <label>Relación esperada con Y</label>
+          <select class="fRelacion">
+            <option value="positiva">Positiva (más nivel → más Y)</option>
+            <option value="negativa">Negativa (más nivel → menos Y)</option>
+            <option value="incierta" selected>Incierta / exploratoria</option>
+          </select>
+        </div>
+      </div>
+      <label>¿Por qué este factor es relevante para la pregunta?</label>
+      <textarea class="fJustif" placeholder="Justificación teórica o empírica del factor">${escapar(justif)}</textarea>
+    `;
+    cont.appendChild(div);
+  }
+
+  function obtenerFactores() {
+    return Array.from(document.querySelectorAll('.factor-tag')).map((box, i) => ({
+      indice: i+1,
+      nombre: box.querySelector('.fNombre').value.trim() || `Factor${i+1}`,
+      niveles: Number(box.querySelector('.fNiveles').value) || 2,
+      tipo: box.querySelector('.fTipo').value,
+      relacion: box.querySelector('.fRelacion').value,
+      justif: box.querySelector('.fJustif').value.trim()
+    }));
+  }
+
+  // ── Clasificador principal ────────────────────────────────
+  function clasificar() {
+    const pregunta   = document.getElementById('pregunta').value.trim();
+    const area       = document.getElementById('area').value;
+    const yNombre    = document.getElementById('yNombre').value.trim() || 'Y';
+    const yUnidad    = document.getElementById('yUnidad').value.trim() || 'unidades';
+    const yTipo      = getRadio('yTipo');
+    const yDist      = getRadio('yDist');
+    const estructura = getRadio('estructura');
+    const nGrupo     = Number(document.getElementById('nPorGrupo').value) || 0;
+    const balanceado = document.getElementById('balanceado').value;
+    const notas      = document.getElementById('notasTexto').value.trim();
+    const factores   = obtenerFactores();
+
+    const probs = {
+      hetero:      document.getElementById('probHetero').checked,
+      noNormal:    document.getElementById('probNoNormal').checked,
+      pequenoN:    document.getElementById('probPequenoN').checked,
+      outliers:    document.getElementById('probOutliers').checked,
+      dependencia: document.getElementById('probDependencia').checked,
+      covariable:  document.getElementById('probCovariable').checked
+    };
+
+    const recom    = determinarDiseno(yTipo, yDist, factores, estructura, probs, nGrupo, balanceado);
+    const alertas  = generarAlertas(factores, probs, nGrupo, balanceado, yTipo, yDist);
+    const checklist = generarChecklist(yNombre, factores, recom, probs, estructura);
+    const codigo   = generarCodigo(yNombre, factores, recom, yTipo, probs, estructura);
+    const tablaFac = generarTablaFactores(factores);
+
+    document.getElementById('resultadoInicial').style.display = 'none';
+
+    document.getElementById('resultadoClasificacion').innerHTML = `
+      <div class="classification">
+        <h3>Diseño recomendado</h3>
+        <p><strong>Modelo principal:</strong> ${escapar(recom.modelo)}</p>
+        <p><strong>Prioridad:</strong> ${escapar(recom.prioridad)}</p>
+        <p><strong>Justificación:</strong> ${escapar(recom.justificacion)}</p>
+        <div>${recom.etiquetas.map(e=>`<span class="badge ${e.color}">${escapar(e.texto)}</span>`).join('')}</div>
+      </div>
+
+      <h3>Resumen del diseño</h3>
+      <table>
+        <tr><th>Elemento</th><th>Información</th></tr>
+        <tr><td>Pregunta</td><td>${escapar(pregunta)}</td></tr>
+        <tr><td>Área</td><td>${traducir(area)}</td></tr>
+        <tr><td>Variable Y</td><td>${escapar(yNombre)} [${escapar(yUnidad)}] — tipo: ${traducir(yTipo)}</td></tr>
+        <tr><td>Distribución esperada</td><td>${traducir(yDist)}</td></tr>
+        <tr><td>Estructura</td><td>${traducir(estructura)} | N/grupo ≈ ${nGrupo||'—'} | ${traducir(balanceado)}</td></tr>
+        <tr><td>Factores</td><td>${factores.length} (${factores.map(f=>escapar(f.nombre)+' k='+f.niveles).join('; ')})</td></tr>
+        <tr><td>Problemas</td><td>${listarProblemas(probs, notas)}</td></tr>
+      </table>
+
+      <h3>Factores del diseño</h3>
+      ${tablaFac}
+
+      <h3>Alertas metodológicas</h3>
+      ${alertas}
+    `;
+
+    document.getElementById('resultadoChecklist').innerHTML = checklist;
+    document.getElementById('resultadoCodigo').innerHTML    = codigo;
+  }
+
+  // ── Lógica de clasificación ───────────────────────────────
+  function determinarDiseno(yTipo, yDist, factores, estructura, probs, n, balanceado) {
+    let modelo       = '';
+    let prioridad    = '';
+    let justificacion = '';
+    let etiquetas    = [];
+
+    // No-paramétrico por defecto ante violaciones severas
+    if (yTipo === 'ordinal') {
+      modelo = 'Kruskal-Wallis (unifactorial) o Friedman (medidas repetidas)';
+      prioridad = 'Alternativa no paramétrica recomendada';
+      justificacion = 'La variable Y es ordinal; las pruebas ANOVA paramétricas no son apropiadas.';
+      etiquetas = [{ texto:'No paramétrico', color:'red' }, { texto:'Kruskal-Wallis/Friedman', color:'yellow' }];
+      return { modelo, prioridad, justificacion, etiquetas };
+    }
+
+    if (yTipo === 'conteo') {
+      modelo = 'GLM Poisson o binomial negativa (ANOVA de Poisson)';
+      prioridad = 'Requiere GLM en lugar de ANOVA clásico';
+      justificacion = 'Y son conteos; la distribución es discreta y puede violar normalidad y homocedasticidad.';
+      etiquetas = [{ texto:'GLM Poisson', color:'purple' }, { texto:'Sobredispersión', color:'yellow' }];
+      return { modelo, prioridad, justificacion, etiquetas };
+    }
+
+    if (yTipo === 'proporcion') {
+      modelo = 'ANOVA de arcoseno(√Y) o GLM beta/binomial fraccional';
+      prioridad = 'Cautela; transformación recomendada';
+      justificacion = 'Y está acotada (0–100%); puede violar supuestos de varianza constante.';
+      etiquetas = [{ texto:'Proporción', color:'yellow' }, { texto:'Transformar arcoseno', color:'purple' }];
+      return { modelo, prioridad, justificacion, etiquetas };
+    }
+
+    // Y continua: selección por estructura y factores
+    const nFac = factores.length;
+    const hayWithin = estructura === 'within' || estructura === 'mixed' ||
+                      factores.some(f => f.tipo === 'within');
+
+    if (probs.covariable) {
+      modelo = 'ANCOVA (Análisis de Covarianza)';
+      prioridad = 'Recomendado para controlar la covariable';
+      justificacion = 'Hay al menos una covariable numérica. ANCOVA elimina su efecto antes de comparar grupos, aumentando la potencia.';
+      etiquetas = [{ texto:'ANCOVA', color:'blue' }, { texto:'Covariable', color:'purple' }];
+    } else if (hayWithin && nFac === 1) {
+      modelo = 'ANOVA de Medidas Repetidas (one-way within-subjects)';
+      prioridad = 'Recomendado';
+      justificacion = 'El mismo sujeto es medido en todos los niveles del factor. Controla variabilidad entre sujetos, aumentando potencia.';
+      etiquetas = [{ texto:'Medidas repetidas', color:'blue' }, { texto:'Esfericidad (Mauchly)', color:'yellow' }];
+    } else if (hayWithin && nFac >= 2) {
+      modelo = 'ANOVA Mixto (split-plot): un factor between + un factor within';
+      prioridad = 'Diseño complejo; verifique estructura cuidadosamente';
+      justificacion = 'Diseño split-plot o mixto con medidas repetidas en uno de los factores.';
+      etiquetas = [{ texto:'Split-plot', color:'purple' }, { texto:'Mixto', color:'blue' }];
+    } else if (estructura === 'bloques') {
+      modelo = `ANOVA en Bloques Completos Aleatorizados (DBCA) — ${nFac > 1 ? 'Factorial en bloques' : 'Unifactorial'}`;
+      prioridad = 'Recomendado para controlar variabilidad del bloque';
+      justificacion = 'El bloqueo extrae la variabilidad entre bloques del error residual, incrementando la potencia de la prueba F del tratamiento.';
+      etiquetas = [{ texto:'DBCA', color:'blue' }, { texto:'Bloqueo', color:'green' }];
+    } else if (nFac === 1) {
+      modelo = 'ANOVA Unifactorial (CRD: Completely Randomized Design)';
+      prioridad = 'Modelo base apropiado';
+      justificacion = 'Un solo factor categórico con k ≥ 3 niveles. El diseño completamente aleatorizado es el más simple y el punto de partida estándar.';
+      etiquetas = [{ texto:'Unifactorial', color:'green' }, { texto:'CRD', color:'blue' }];
+    } else if (nFac === 2) {
+      modelo = `ANOVA Factorial ${factores.map(f=>f.niveles).join('×')} (Two-Way Factorial)`;
+      prioridad = 'Recomendado — permite estimar interacción';
+      justificacion = 'Dos factores entre-sujetos. La interacción A×B permite detectar si el efecto de un factor depende del nivel del otro.';
+      etiquetas = [{ texto:'Factorial', color:'green' }, { texto:'Interacción A×B', color:'purple' }];
+    } else {
+      modelo = `ANOVA Factorial de ${nFac} Factores (Diseño ${factores.map(f=>f.niveles).join('×')})`;
+      prioridad = 'Diseño complejo; asegure N suficiente por celda';
+      justificacion = 'Tres o más factores. Evalúe si tiene suficientes réplicas para estimar todas las interacciones de orden superior.';
+      etiquetas = [{ texto:`${nFac} Factores`, color:'purple' }, { texto:'Interacciones múltiples', color:'yellow' }];
+    }
+
+    // Modificadores por problemas
+    if (probs.hetero) {
+      etiquetas.push({ texto:'Welch/Games-Howell', color:'yellow' });
+      justificacion += ' Ante varianzas desiguales: usar Welch ANOVA y Games-Howell post-hoc.';
+    }
+
+    if (probs.noNormal && n > 0 && n < 15) {
+      etiquetas.push({ texto:'Kruskal-Wallis como alternativa', color:'red' });
+    }
+
+    if (n > 0 && n < 10) {
+      prioridad = 'Exploratorio — N limitado por celda';
+      etiquetas.push({ texto:'N pequeño', color:'yellow' });
+    }
+
+    if (!balanceado || balanceado === 'no') {
+      etiquetas.push({ texto:'Tipo III SS recomendado', color:'yellow' });
+    }
+
+    return { modelo, prioridad, justificacion, etiquetas };
+  }
+
+  // ── Alertas ───────────────────────────────────────────────
+  function generarAlertas(factores, probs, n, balanceado, yTipo, yDist) {
+    const alertas = [];
+
+    if (factores.length < 1) {
+      alertas.push(`<div class="alert danger"><strong>Sin factores:</strong> defina al menos un factor.</div>`);
+    } else {
+      const totalCeldas = factores.reduce((a,f)=>a*f.niveles, 1);
+      alertas.push(`<div class="alert ok"><strong>Diseño detectado:</strong> ${factores.length} factor(es) × ${factores.map(f=>f.niveles+'L').join('×')} = ${totalCeldas} celdas. N total estimado ≈ ${totalCeldas*(n||'—')} observaciones.</div>`);
+    }
+
+    if (n > 0 && factores.length > 0) {
+      const totalCeldas = factores.reduce((a,f)=>a*f.niveles, 1);
+      const totalN = totalCeldas * n;
+      const minNorma = totalCeldas * 10;
+      if (n < 5) {
+        alertas.push(`<div class="alert danger"><strong>N crítico por celda (${n}):</strong> con menos de 5 réplicas/celda los estimadores de varianza son muy inestables. Limite el análisis a exploración preliminar.</div>`);
+      } else if (n < 10) {
+        alertas.push(`<div class="alert warn"><strong>N pequeño por celda (${n}):</strong> puede comprometer la potencia de la prueba F y la validez de las pruebas de normalidad.</div>`);
+      } else {
+        alertas.push(`<div class="alert ok"><strong>N por celda (${n}):</strong> suficiente para estimaciones razonables. N total ≈ ${totalN}.</div>`);
+      }
+    }
+
+    if (probs.hetero) {
+      alertas.push(`<div class="alert warn"><strong>Posible heterocedasticidad:</strong> ejecute la prueba de Levene. Si p &lt; 0.05, use ANOVA de Welch y Games-Howell para post-hoc en lugar de Tukey HSD.</div>`);
+    }
+
+    if (probs.noNormal) {
+      alertas.push(`<div class="alert warn"><strong>No normalidad posible:</strong> verifique con Shapiro-Wilk por grupo. Si N/grupo ≥ 15, el ANOVA es robusto (TCL). Si N es pequeño, considere Kruskal-Wallis.</div>`);
+    }
+
+    if (probs.covariable) {
+      alertas.push(`<div class="alert warn"><strong>Covariable presente:</strong> si no se incluye en el modelo, puede inflar el error residual (MS_E) y reducir la potencia. Use ANCOVA.</div>`);
+    }
+
+    if (probs.dependencia) {
+      alertas.push(`<div class="alert danger"><strong>Dependencia entre observaciones:</strong> si múltiples observaciones vienen del mismo sujeto, unidad o sitio, el ANOVA estándar viola el supuesto de independencia. Use modelos mixtos (LMM) o ANOVA de medidas repetidas.</div>`);
+    }
+
+    if (balanceado === 'no') {
+      alertas.push(`<div class="alert warn"><strong>Diseño no balanceado:</strong> use Sumas de Cuadrados Tipo III (typ=3 en statsmodels) para efectos principales e interacción, ya que Tipo I es sensible al orden en diseños desbalanceados.</div>`);
+    }
+
+    if (yDist === 'sesgada') {
+      alertas.push(`<div class="alert warn"><strong>Distribución sesgada:</strong> considere transformar Y (logaritmo, raíz cuadrada o Box-Cox) antes del ANOVA, o use Kruskal-Wallis como alternativa robusta.</div>`);
+    }
+
+    if (factores.length > 1) {
+      alertas.push(`<div class="alert ok"><strong>Diseño factorial:</strong> recuerde que si la interacción A×B es significativa, los efectos principales no pueden interpretarse de forma aislada. Debe proceder con análisis de efectos simples (simple effects).</div>`);
+    }
+
+    return alertas.join('');
+  }
+
+  // ── Checklist ─────────────────────────────────────────────
+  function generarChecklist(yNombre, factores, recom, probs, estructura) {
+    const Y     = limpiarId(yNombre) || 'Y';
+    const fNames = factores.map(f => limpiarId(f.nombre));
+    const formula = fNames.length === 1
+      ? `${Y} ~ C(${fNames[0]})`
+      : `${Y} ~ ${fNames.map(f=>`C(${f})`).join(' * ')}`;
+    const hayWithin = estructura === 'within' || estructura === 'mixed';
+
+    const items = [
+      'Cargar y revisar el dataset: str(), describe(), isnull().sum().',
+      'Verificar tipos de variable: Y continua, factores como categorías.',
+      'Calcular estadísticos descriptivos por grupo (media, DE, n).',
+      'Generar boxplots por grupo para inspección visual previa.',
+      `Ajustar el modelo: smf.ols('${formula}', data=df).fit()`,
+      'Obtener tabla ANOVA con anova_lm(modelo, typ=2).',
+      'Ejecutar prueba de Levene para homocedasticidad entre grupos.',
+      'Ejecutar Shapiro-Wilk sobre los residuos del modelo.',
+      'Revisar Q-Q plot y gráfico de residuos vs valores ajustados.',
+      probs.hetero ? 'Si Levene es significativo: usar ANOVA de Welch y Games-Howell.' : null,
+      'Si F es significativo (p < α): aplicar Tukey HSD o Games-Howell.',
+      'Calcular ω² y η² parcial; interpretar según umbrales de Cohen.',
+      factores.length > 1 ? 'Si la interacción es significativa: análisis de efectos simples por nivel del otro factor.' : null,
+      factores.length > 1 ? 'Graficar interacción: ¿son paralelas las líneas? (Si no → interpretar efectos simples).' : null,
+      hayWithin ? 'Verificar esfericidad con prueba de Mauchly. Si se viola: corrección Greenhouse-Geisser.' : null,
+      'Reportar resultados en formato APA: F(df_num, df_den), p, ω².',
+      'Generar al menos: boxplot por grupo, Q-Q residuos, intervalos de confianza Tukey.'
+    ].filter(Boolean);
+
+    return `
+      <h3>Checklist personalizado</h3>
+      <p><strong>Modelo sugerido:</strong> ${escapar(recom.modelo)}</p>
+      <div>
+        ${items.map((it,i)=>`
+          <label class="checklist-item">
+            <input type="checkbox">
+            <span><strong>${i+1}.</strong> ${escapar(it)}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ── Código Python ─────────────────────────────────────────
+  function generarCodigo(yNombre, factores, recom, yTipo, probs, estructura) {
+    const Y      = limpiarId(yNombre) || 'Y';
+    const fNames = factores.map(f => limpiarId(f.nombre));
+    const hayWithin = estructura === 'within' || estructura === 'mixed';
+    const hayCov    = probs.covariable;
+
+    let formula = '';
+    if (fNames.length === 0) {
+      formula = `${Y} ~ C(factor_A)`;
+    } else if (fNames.length === 1) {
+      formula = `${Y} ~ C(${fNames[0]})`;
+    } else {
+      formula = `${Y} ~ ${fNames.map(f=>`C(${f})`).join(' * ')}`;
+    }
+    if (hayCov) formula += ' + covariable';
+
+    let codigo = `# ============================================================
+# PLANTILLA ANOVA — Generado por Clasificador de Diseños
+# Modelo recomendado: ${recom.modelo}
+# ============================================================
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import shapiro, levene, kruskal, f_oneway
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.stats.anova import anova_lm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+import warnings
+warnings.filterwarnings("ignore")
+
+# 1. CARGAR DATOS
+# from google.colab import drive
+# drive.mount('/content/drive')
+# df = pd.read_csv('/content/drive/MyDrive/tu_archivo.csv')
+
+# 2. REVISIÓN INICIAL
+print(df.shape)
+print(df.dtypes)
+print(df.isnull().sum())
+print(df.describe())
+
+# 3. ESTADÍSTICOS POR GRUPO
+`;
+
+    if (fNames.length > 0) {
+      codigo += `print(df.groupby(${JSON.stringify(fNames.length===1?fNames[0]:fNames)}, observed=True)['${Y}']
+       .agg(n='count', media='mean', de='std').round(2))\n\n`;
+    }
+
+    codigo += `# 4. VISUALIZACIÓN EXPLORATORIA
+fig, axes = plt.subplots(1, 2, figsize=(14,5))
+`;
+    if (fNames.length > 0) {
+      codigo += `sns.boxplot(x='${fNames[0]}', y='${Y}'${fNames.length>1?`, hue='${fNames[1]}'`:''}, data=df, palette='Set2', ax=axes[0])
+axes[0].set_title('Distribución de ${Y} por Grupo')
+sns.stripplot(x='${fNames[0]}', y='${Y}', data=df, color='black', alpha=0.3, ax=axes[0])
+`;
+    }
+    codigo += `sns.histplot(df['${Y}'], bins=20, kde=True, ax=axes[1])
+axes[1].set_title('Distribución de ${Y}')
+plt.tight_layout(); plt.show()
+
+# 5. AJUSTE DEL MODELO ANOVA
+modelo = smf.ols('${formula}', data=df).fit()
+tipo_ss = ${probs.noNormal||fNames.length>1?2:1}  # Tipo II para factorial o diseños no balanceados
+tabla   = anova_lm(modelo, typ=tipo_ss)
+print("\\n=== TABLA ANOVA (Tipo", tipo_ss, ") ===")
+print(tabla.round(4))
+
+# 6. DIAGNÓSTICO DE SUPUESTOS
+resid  = modelo.resid
+fitted = modelo.fittedvalues
+
+`;
+    if (fNames.length > 0) {
+      codigo += `grupos = [g['${Y}'].values for _, g in df.groupby('${fNames[0]}', observed=True)]
+L_stat, L_p = levene(*grupos)
+print(f"Levene (Homocedasticidad): F={L_stat:.3f}, p={L_p:.4f} {'→ OK' if L_p>0.05 else '→ VIOLADO'}")
+`;
+    }
+    codigo += `W_stat, W_p = shapiro(resid)
+print(f"Shapiro-Wilk (residuos):    W={W_stat:.4f}, p={W_p:.4f} {'→ OK' if W_p>0.05 else '→ VIOLADO'}")
+
+fig, axes = plt.subplots(1, 2, figsize=(12,5))
+sm.qqplot(resid, line='45', fit=True, ax=axes[0], alpha=0.5)
+axes[0].set_title('Q-Q Plot Residuos')
+axes[1].scatter(fitted, resid, alpha=0.5, color='steelblue')
+axes[1].axhline(0, color='red', linestyle='--')
+axes[1].set_title('Residuos vs Ajustados')
+plt.tight_layout(); plt.show()
+
+`;
+
+    if (yTipo !== 'ordinal') {
+      codigo += `# Alternativa no paramétrica (si supuestos se violan)
+`;
+      if (fNames.length > 0) {
+        codigo += `H_stat, H_p = kruskal(*grupos)
+print(f"Kruskal-Wallis: H={H_stat:.3f}, p={H_p:.4f}")
+
+`;
+      }
+    }
+
+    if (probs.hetero) {
+      codigo += `# ANOVA de Welch (heterocedasticidad):
+from scipy.stats import f_oneway
+# Para Welch use pingouin (pip install pingouin):
+# import pingouin as pg; pg.welch_anova(data=df, dv='${Y}', between='${fNames[0]||'factor_A'}')
+
+# Games-Howell post-hoc (heterocedasticidad):
+# pg.pairwise_gameshowell(data=df, dv='${Y}', between='${fNames[0]||'factor_A'}')
+
+`;
+    }
+
+    codigo += `# 7. POST-HOC: TUKEY HSD (si F significativo)
+p_global = tabla.iloc[0]['PR(>F)']
+if p_global < 0.05:
+    print("\\n=== POST-HOC: TUKEY HSD ===")
+`;
+    if (fNames.length > 0) {
+      codigo += `    tukey = pairwise_tukeyhsd(endog=df['${Y}'], groups=df['${fNames[0]}'], alpha=0.05)
+    print(tukey.summary())
+    tukey.plot_simultaneous(); plt.show()
+`;
+    }
+
+    codigo += `else:
+    print("F no significativo → sin post-hoc.")
+
+# 8. TAMAÑO DEL EFECTO
+SS_A = tabla.iloc[0]['sum_sq']
+SS_E = tabla.loc['Residual','sum_sq']
+MS_E = tabla.loc['Residual','mean_sq']
+SS_T = SS_A + SS_E
+k    = ${fNames.length>0?`df['${fNames[0]}'].nunique()`:'3'}
+
+eta2   = SS_A / SS_T
+omega2 = (SS_A - (k-1)*MS_E) / (SS_T + MS_E)
+print(f"\\nη²  = {eta2:.4f}  {'[Grande]' if eta2>=0.14 else '[Mediano]' if eta2>=0.06 else '[Pequeño]'}")
+print(f"ω²  = {omega2:.4f} {'[Grande]' if omega2>=0.14 else '[Mediano]' if omega2>=0.06 else '[Pequeño]'}  ← estimador insesgado")
+`;
+
+    return `
+      <h3>Plantilla de código sugerida (Python / Colab)</h3>
+      <p class="small">Adapte los nombres de columnas y la ruta del archivo. Esta plantilla es una guía inicial basada en la clasificación del diseño.</p>
+      <div class="code-block">${escapar(codigo)}</div>
+    `;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  function generarTablaFactores(factores) {
+    if (!factores.length) return `<div class="alert warn">No hay factores registrados.</div>`;
+    return `
+      <table>
+        <tr><th>Factor</th><th>k Niveles</th><th>Estructura</th><th>Relación esperada</th><th>Justificación</th></tr>
+        ${factores.map(f=>`
+          <tr>
+            <td>${escapar(f.nombre)}</td>
+            <td>${f.niveles}</td>
+            <td>${traducir(f.tipo)}</td>
+            <td>${traducir(f.relacion)}</td>
+            <td>${escapar(f.justif||'Pendiente')}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `;
+  }
+
+  function listarProblemas(probs, notas) {
+    const lista = [];
+    if (probs.hetero)      lista.push('varianzas desiguales');
+    if (probs.noNormal)    lista.push('no normalidad');
+    if (probs.pequenoN)    lista.push('N pequeño');
+    if (probs.outliers)    lista.push('outliers');
+    if (probs.dependencia) lista.push('dependencia');
+    if (probs.covariable)  lista.push('covariable numérica');
+    if (notas)             lista.push(escapar(notas));
+    return lista.length ? lista.join('; ') : 'Ninguno reportado';
+  }
+
+  function traducir(v) {
+    const d = {
+      ecologia:'Ecología / Biología marina', salud:'Salud / Ciencias biomédicas',
+      educativa:'Educativa / Psicológica', agronomia:'Agronomía / Ciencias del suelo',
+      ingenieria:'Ingeniería / Calidad', socioeconomica:'Socio-económica', otra:'Otra',
+      continua:'Continua', conteo:'Conteo', proporcion:'Proporción', ordinal:'Ordinal',
+      normal:'Normal / simétrica', sesgada:'Sesgada positiva', bimodal:'Bimodal',
+      desconocida:'Desconocida',
+      between:'Entre-sujetos', within:'Dentro-sujetos (medidas repetidas)',
+      mixed:'Mixto (between+within)', bloques:'Bloques aleatorizados (DBCA)',
+      si:'Balanceado', no:'No balanceado', desconocido:'Por definir',
+      positiva:'Positiva', negativa:'Negativa', incierta:'Incierta / exploratoria'
+    };
+    return d[v] || escapar(v);
+  }
+
+  function limpiar() {
+    document.getElementById('pregunta').value = '¿Difieren significativamente las medias de mi variable de respuesta entre los niveles del factor o factores de interés?';
+    document.getElementById('yNombre').value = '';
+    document.getElementById('yUnidad').value = '';
+    document.getElementById('nPorGrupo').value = '';
+    document.getElementById('notasTexto').value = '';
+    document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+    document.getElementById('contenedorFactores').innerHTML = '';
+    contadorFactores = 0;
+    inicializarFactores();
+    document.getElementById('resultadoInicial').style.display = 'block';
+    document.getElementById('resultadoClasificacion').innerHTML = '';
+    document.getElementById('resultadoChecklist').innerHTML = '';
+    document.getElementById('resultadoCodigo').innerHTML = '';
+  }
+
+  function inicializarFactores() {
+    agregarFactor('proteccion', 3, 'between', 'Nivel de protección marina: APM_Total, APM_Parcial, Libre');
+    agregarFactor('estacion', 2, 'between', 'Estación climática: Seca, Lluviosa');
+  }
+
+  // ── Auto-tests ────────────────────────────────────────────
+  function runTests() {
+    const tests = [];
+    function assert(nombre, cond) { tests.push({nombre, ok:Boolean(cond)}); if(!cond) console.error('Fallo:',nombre); }
+
+    const baseProbs = { hetero:false, noNormal:false, pequenoN:false, outliers:false, dependencia:false, covariable:false };
+
+    const r1 = determinarDiseno('continua','normal',[{nombre:'f',niveles:3,tipo:'between'}],'between',baseProbs,25,'si');
+    assert('Unifactorial CRD', r1.modelo.includes('Unifactorial'));
+
+    const r2 = determinarDiseno('continua','normal',[{nombre:'A',niveles:3,tipo:'between'},{nombre:'B',niveles:2,tipo:'between'}],'between',baseProbs,25,'si');
+    assert('Factorial 3×2', r2.modelo.includes('Factorial'));
+
+    const r3 = determinarDiseno('ordinal','normal',[{nombre:'f',niveles:3,tipo:'between'}],'between',baseProbs,25,'si');
+    assert('Ordinal → Kruskal-Wallis', r3.modelo.includes('Kruskal'));
+
+    const r4 = determinarDiseno('continua','normal',[{nombre:'f',niveles:3,tipo:'within'}],'within',baseProbs,25,'si');
+    assert('Within → Medidas Repetidas', r4.modelo.includes('Repetidas'));
+
+    const r5 = determinarDiseno('continua','normal',[{nombre:'f',niveles:3,tipo:'between'}],'between',{...baseProbs,covariable:true},25,'si');
+    assert('Covariable → ANCOVA', r5.modelo.includes('ANCOVA'));
+
+    const ok = tests.filter(t=>t.ok).length;
+    const box = document.getElementById('resultadoTests');
+    if (box) box.innerHTML = `<strong>Pruebas internas:</strong> ${ok}/${tests.length}. ${ok===tests.length?'Sin errores detectados.':'Revise la consola del navegador.'}`;
+  }
+
+  inicializarFactores();
+  runTests();
+</script>
+</body>
+</html>

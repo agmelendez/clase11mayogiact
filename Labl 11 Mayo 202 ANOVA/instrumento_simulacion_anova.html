@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instrumento de Simulación ANOVA — Sprint 3</title>
+  <style>
+    :root {
+      --azul: #005da4;
+      --azul-oscuro: #003f73;
+      --azul-claro: #e8f3fb;
+      --gris-fondo: #f4f6f8;
+      --gris-borde: #d7dee5;
+      --texto: #1f2933;
+      --verde: #1b8a5a;
+      --amarillo: #b7791f;
+      --rojo: #b83232;
+      --morado: #5b4b8a;
+      --blanco: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--gris-fondo);
+      color: var(--texto);
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--azul), var(--azul-oscuro));
+      color: white;
+      padding: 28px 36px;
+      border-bottom: 6px solid #f2c94c;
+    }
+
+    header h1 { margin: 0 0 8px; font-size: 2rem; }
+    header p { max-width: 1180px; margin: 0; opacity: .95; }
+
+    main {
+      max-width: 1360px;
+      margin: 26px auto;
+      padding: 0 20px 42px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1050px) { main { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--blanco);
+      border: 1px solid var(--gris-borde);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      margin-bottom: 22px;
+    }
+
+    .card h2 {
+      color: var(--azul);
+      margin-top: 0;
+      border-bottom: 2px solid var(--azul-claro);
+      padding-bottom: 8px;
+      font-size: 1.35rem;
+    }
+
+    .card h3 { color: var(--azul-oscuro); margin-top: 22px; font-size: 1.08rem; }
+
+    label { display: block; font-weight: bold; margin: 12px 0 6px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #b9c4cf;
+      border-radius: 10px;
+      font-size: .95rem;
+      color: var(--texto);
+      background: white;
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    .row   { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    @media (max-width: 820px) { .row, .row-3, .row-4 { grid-template-columns: 1fr; } }
+
+    .factor-box {
+      border: 1px dashed #9db4c8;
+      background: #fbfdff;
+      padding: 14px;
+      border-radius: 14px;
+      margin-top: 12px;
+    }
+
+    .nivel-box {
+      background: #f0f7ff;
+      border: 1px solid #c8dff5;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: .2s ease;
+      font-size: .95rem;
+    }
+
+    button.primary   { background: var(--azul); color: white; }
+    button.secondary { background: #e6edf3; color: #233; }
+    button.warning   { background: #f6ad55; color: #2d1600; }
+    button.danger    { background: #fde2e2; color: var(--rojo); }
+
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,.10); }
+
+    .result-panel { position: sticky; top: 18px; }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+      border: 1px solid transparent;
+    }
+
+    .alert.ok     { background: #eefaf3; border-color: #b7e4c7; }
+    .alert.warn   { background: #fff8e1; border-color: #f5d57a; }
+    .alert.danger { background: #fdecec; border-color: #f5b5b5; }
+    .alert.info   { background: var(--azul-claro); border-color: #b7d7ee; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: bold;
+      font-size: .85rem;
+      margin: 4px 4px 4px 0;
+    }
+
+    .badge.blue   { background: var(--azul-claro); color: var(--azul); }
+    .badge.green  { background: #dff5e8; color: var(--verde); }
+    .badge.yellow { background: #fff4d6; color: var(--amarillo); }
+    .badge.red    { background: #fde2e2; color: var(--rojo); }
+    .badge.purple { background: #eee9ff; color: var(--morado); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: .92rem;
+    }
+
+    th, td {
+      border: 1px solid var(--gris-borde);
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: var(--azul-claro); color: var(--azul-oscuro); }
+
+    .code-block {
+      background: #1f2933;
+      color: #e6edf3;
+      padding: 14px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: .85rem;
+      white-space: pre-wrap;
+      max-height: 700px;
+      overflow-y: auto;
+    }
+
+    .small { font-size: .88rem; color: #52616f; }
+
+    .help {
+      display: block;
+      margin-top: 6px;
+      font-size: .82rem;
+      line-height: 1.35;
+      color: #52616f;
+    }
+
+    .step {
+      border-left: 5px solid var(--azul);
+      background: #fbfdff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .checklist-item input { width: auto; margin-top: 5px; }
+
+    .print-note { display: none; }
+
+    @media print {
+      body { background: white; }
+      header, .actions, .no-print { display: none !important; }
+      main { display: block; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .result-panel { position: static; }
+      .print-note { display: block; font-weight: bold; margin-bottom: 12px; }
+      .code-block { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Instrumento de Simulación y Diagnóstico ANOVA — Sprint 3</h1>
+  <p>
+    Herramienta complementaria para diseñar un experimento factorial, definir factores y niveles,
+    configurar supuestos de simulación (media, varianza, tamaño de efecto), seleccionar escenarios de violación de supuestos,
+    y generar automáticamente código en R y Python listo para ejecutar en Google Colab.
+  </p>
+</header>
+
+<main>
+  <div style="grid-column: 1 / -1; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+    <a href="index.html" style="display: inline-block; padding: 10px 16px; background-color: var(--azul-oscuro); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem;">← Volver al Laboratorio Principal</a>
+    <a href="clasificador_analisis_anova.html" style="display: inline-block; padding: 10px 16px; background-color: var(--azul); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem;">📊 Clasificador de Diseños ANOVA →</a>
+  </div>
+
+  <section>
+    <!-- CARD 1: Configuración del diseño -->
+    <div class="card">
+      <h2>1. Configuración del Diseño ANOVA</h2>
+      <p class="small">Defina el tipo de diseño ANOVA, el número de factores y los parámetros globales de simulación.</p>
+
+      <label for="tipoDiseno">Tipo de diseño</label>
+      <select id="tipoDiseno" onchange="actualizarDiseno()">
+        <option value="unifactorial">Unifactorial (1 Factor)</option>
+        <option value="factorial2x" selected>Factorial completo (2 Factores con interacción)</option>
+        <option value="bloques">Diseño en Bloques Completos Aleatorizados (DBCA)</option>
+        <option value="repetidas">Medidas Repetidas (1 factor within-subjects)</option>
+      </select>
+      <span class="help">Seleccione el diseño experimental que mejor representa su pregunta de investigación.</span>
+
+      <div class="row-3" style="margin-top:14px;">
+        <div>
+          <label for="nPorCelda">N por celda/grupo</label>
+          <input id="nPorCelda" type="number" value="25" min="5" max="200" />
+          <span class="help">Réplicas por combinación de tratamientos. Diseño balanceado (igual N) recomendado.</span>
+        </div>
+        <div>
+          <label for="semilla">Semilla reproducible</label>
+          <input id="semilla" type="number" value="2026" />
+          <span class="help">Permite reproducir exactamente la misma simulación.</span>
+        </div>
+        <div>
+          <label for="lenguaje">Lenguaje de código</label>
+          <select id="lenguaje">
+            <option value="python">Python / Colab</option>
+            <option value="r">R</option>
+            <option value="ambos">R + Python</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="escenario" style="margin-top:14px;">Escenario de simulación</label>
+      <select id="escenario">
+        <option value="base">Base: supuestos cumplidos (homocedasticidad + normalidad)</option>
+        <option value="hetero">Heterocedasticidad: varianzas desiguales entre grupos</option>
+        <option value="noNormal">No normalidad: distribución asimétrica intragrupo</option>
+        <option value="outliers">Outliers influyentes en algunos grupos</option>
+        <option value="efectoNulo">Efecto nulo: sin diferencias reales entre medias</option>
+      </select>
+      <span class="help">Permite inducir condiciones específicas para practicar diagnóstico de supuestos y selección de alternativas (Kruskal-Wallis, Welch, Games-Howell).</span>
+
+      <label for="contexto" style="margin-top:14px;">Contexto sustantivo del proyecto</label>
+      <textarea id="contexto">Experimento sobre el efecto de tratamientos en una variable de respuesta continua. La simulación permite practicar el diseño factorial, la verificación de supuestos ANOVA y la selección de pruebas post-hoc apropiadas antes de trabajar con datos empíricos reales.</textarea>
+    </div>
+
+    <!-- CARD 2: Factores y niveles -->
+    <div class="card">
+      <h2>2. Definición de Factores y Niveles</h2>
+      <p class="small">Configure cada factor del diseño: nombre, niveles y medias esperadas por nivel. Las medias definen el tamaño del efecto verdadero del DGP.</p>
+
+      <div id="contenedorFactores"></div>
+
+      <div class="actions">
+        <button class="primary" type="button" onclick="generarInstrumento()">⚙️ Generar simulación y código</button>
+        <button class="warning" type="button" onclick="window.print()">🖨️ Imprimir / guardar PDF</button>
+      </div>
+    </div>
+
+    <!-- CARD 3: Variable respuesta -->
+    <div class="card">
+      <h2>3. Variable Respuesta (Y)</h2>
+
+      <label for="yNombre">Nombre de la variable dependiente</label>
+      <input id="yNombre" type="text" value="biomasa" placeholder="Ejemplo: biomasa, puntuacion, rendimiento" />
+
+      <label for="yUnidad">Unidades de medición</label>
+      <input id="yUnidad" type="text" value="kg/100m²" placeholder="Ejemplo: kg, puntos, cm, %" />
+
+      <div class="row-3" style="margin-top:10px;">
+        <div>
+          <label for="sigmaError">Desv. estándar intragrupo (σ)</label>
+          <input id="sigmaError" type="number" value="6" min="0.1" step="0.5" />
+          <span class="help">Variabilidad residual dentro de cada celda. Controla el "ruido" del experimento. Misma para todos los grupos si se asume homocedasticidad.</span>
+        </div>
+        <div>
+          <label for="distribucionY">Distribución de errores</label>
+          <select id="distribucionY">
+            <option value="normal">Normal (supuesto cumplido)</option>
+            <option value="sesgada">Sesgada positiva (gamma/log-normal)</option>
+            <option value="tPesada">Colas pesadas (t con df=3)</option>
+          </select>
+        </div>
+        <div>
+          <label for="alphaTest">Nivel de significancia α</label>
+          <select id="alphaTest">
+            <option value="0.05" selected>α = 0.05 (estándar)</option>
+            <option value="0.01">α = 0.01 (estricto)</option>
+            <option value="0.10">α = 0.10 (exploratorio)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel de resultados -->
+  <aside class="result-panel">
+    <div class="card">
+      <p class="print-note">Reporte generado por el Instrumento de Simulación ANOVA — Sprint 3</p>
+      <h2>Resultado del instrumento</h2>
+      <div id="resultadoInicial" class="alert info">
+        Configure el diseño, defina los factores y sus niveles, luego presione <strong>Generar simulación y código</strong>.
+      </div>
+      <div id="resultadoMetodologia"></div>
+      <div id="resultadoChecklist"></div>
+      <div id="resultadoCodigo"></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  // ── Inicialización ──────────────────────────────────────────
+  let factores = [];
+
+  function escapar(t) {
+    return String(t)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;');
+  }
+
+  function limpiarId(s) {
+    return (s||'').trim()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-zA-Z0-9_]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  }
+
+  function inicializar() {
+    factores = [
+      {
+        nombre: 'proteccion',
+        niveles: [
+          { nombre: 'AMP_Total',   media: 48.5 },
+          { nombre: 'AMP_Parcial', media: 32.5 },
+          { nombre: 'Libre',       media: 19.5 }
+        ]
+      },
+      {
+        nombre: 'estacion',
+        niveles: [
+          { nombre: 'Seca',     media: 0 },
+          { nombre: 'Lluviosa', media: 5 }
+        ]
+      }
+    ];
+    renderFactores();
+  }
+
+  function actualizarDiseno() {
+    const tipo = document.getElementById('tipoDiseno').value;
+    if (tipo === 'unifactorial' || tipo === 'repetidas') {
+      // Mantener solo el primer factor
+      if (factores.length > 1) factores = [factores[0]];
+    } else if (tipo === 'factorial2x' || tipo === 'bloques') {
+      if (factores.length < 2) {
+        factores.push({ nombre: 'factor_B', niveles: [{ nombre: 'Nivel_1', media: 0 }, { nombre: 'Nivel_2', media: 5 }] });
+      }
+    }
+    renderFactores();
+  }
+
+  function renderFactores() {
+    const cont = document.getElementById('contenedorFactores');
+    cont.innerHTML = factores.map((f, fi) => `
+      <div class="factor-box">
+        <h3>Factor ${fi+1}: ${escapar(f.nombre)}</h3>
+        <div class="row">
+          <div>
+            <label>Nombre del factor</label>
+            <input type="text" value="${escapar(f.nombre)}"
+              onchange="factores[${fi}].nombre=limpiarId(this.value); renderFactores()">
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:8px;">
+            <button class="secondary" type="button" onclick="agregarNivel(${fi})">+ Agregar nivel</button>
+            ${factores.length > 1 ? `<button class="danger" type="button" onclick="eliminarFactor(${fi})">Eliminar factor</button>` : ''}
+          </div>
+        </div>
+        <label style="margin-top:10px;">Niveles del Factor y Media esperada por nivel (μ)</label>
+        ${f.niveles.map((niv, ni) => `
+          <div class="nivel-box">
+            <div class="row-3">
+              <div>
+                <label style="font-size:.85rem;">Nombre nivel ${ni+1}</label>
+                <input type="text" value="${escapar(niv.nombre)}"
+                  onchange="factores[${fi}].niveles[${ni}].nombre=limpiarId(this.value)">
+              </div>
+              <div>
+                <label style="font-size:.85rem;">Media esperada (μ)</label>
+                <input type="number" value="${niv.media}" step="0.5"
+                  onchange="factores[${fi}].niveles[${ni}].media=Number(this.value)">
+              </div>
+              <div style="display:flex;align-items:flex-end;">
+                ${f.niveles.length > 2 ? `<button class="danger" type="button" onclick="factores[${fi}].niveles.splice(${ni},1);renderFactores()" style="width:100%">Eliminar</button>` : '<span class="small">Mínimo 2</span>'}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('') + `
+      <div class="actions" style="margin-top:10px;">
+        ${factores.length < 3 ? `<button class="secondary" type="button" onclick="agregarFactor()">+ Agregar factor</button>` : ''}
+      </div>
+    `;
+  }
+
+  function agregarNivel(fi) {
+    factores[fi].niveles.push({ nombre: `Nivel_${factores[fi].niveles.length+1}`, media: 0 });
+    renderFactores();
+  }
+
+  function eliminarFactor(fi) {
+    factores.splice(fi, 1);
+    renderFactores();
+  }
+
+  function agregarFactor() {
+    const letra = ['A','B','C'][factores.length] || 'X';
+    factores.push({
+      nombre: `factor_${letra}`,
+      niveles: [
+        { nombre: 'Nivel_1', media: 0 },
+        { nombre: 'Nivel_2', media: 5 }
+      ]
+    });
+    renderFactores();
+  }
+
+  // ── Generación del instrumento ────────────────────────────
+  function generarInstrumento() {
+    const config = {
+      tipo: document.getElementById('tipoDiseno').value,
+      n: Number(document.getElementById('nPorCelda').value) || 25,
+      semilla: Number(document.getElementById('semilla').value) || 2026,
+      sigma: Number(document.getElementById('sigmaError').value) || 5,
+      yNombre: limpiarId(document.getElementById('yNombre').value) || 'Y',
+      yUnidad: document.getElementById('yUnidad').value || 'unidades',
+      distribucion: document.getElementById('distribucionY').value,
+      escenario: document.getElementById('escenario').value,
+      alpha: Number(document.getElementById('alphaTest').value) || 0.05,
+      lenguaje: document.getElementById('lenguaje').value,
+      contexto: document.getElementById('contexto').value.trim(),
+      factores: factores.map(f => ({
+        nombre: limpiarId(f.nombre) || 'factor',
+        niveles: f.niveles.map(n => ({ nombre: limpiarId(n.nombre)||'nivel', media: n.media }))
+      }))
+    };
+
+    document.getElementById('resultadoInicial').style.display = 'none';
+    document.getElementById('resultadoMetodologia').innerHTML = generarMetodologia(config);
+    document.getElementById('resultadoChecklist').innerHTML   = generarChecklist(config);
+    document.getElementById('resultadoCodigo').innerHTML      = generarCodigo(config);
+  }
+
+  // ── Metodología ───────────────────────────────────────────
+  function generarMetodologia(c) {
+    const totalCeldas = c.factores.reduce((acc, f) => acc * f.niveles.length, 1);
+    const totalN = totalCeldas * c.n;
+    const nombreModelo = nombreDiseno(c);
+
+    const pasos = [
+      `<strong>Especificación del diseño:</strong> ${nombreModelo} con ${c.factores.length} factor(es) y ${totalCeldas} celdas. N total = ${totalN} (${c.n} réplicas/celda).`,
+      `<strong>Hipótesis nulas:</strong> ${c.factores.map(f=>`H₀: todas las medias del factor <em>${escapar(f.nombre)}</em> son iguales.`).join(' ')} ${c.factores.length>1 ? 'H₀ interacción: efecto de A es el mismo en todos los niveles de B.' : ''}`,
+      `<strong>Generación de datos:</strong> Se simula un proceso DGP con las medias definidas, σ = ${c.sigma} y distribución de errores: ${c.distribucion}. Semilla = ${c.semilla}.`,
+      `<strong>Modelo ajustado:</strong> Se estima mediante mínimos cuadrados (regresión con variables indicadoras para los factores categóricos).`,
+      `<strong>Diagnóstico:</strong> Prueba de Levene (homocedasticidad), Shapiro-Wilk (normalidad de residuos), inspección visual con Q-Q plot y boxplot de residuos por grupo.`,
+      `<strong>Post-hoc:</strong> Si la F global es significativa, se aplica Tukey HSD (varianzas homogéneas) o Games-Howell (varianzas heterogéneas).`,
+      `<strong>Tamaño del efecto:</strong> Se reporta ω² (omega-cuadrado, insesgado) y η² parcial para cada factor.`
+    ];
+
+    const badgesHtml = [
+      `<span class="badge blue">${escapar(c.tipo)}</span>`,
+      `<span class="badge purple">${c.factores.length} factor(es)</span>`,
+      `<span class="badge green">N total = ${totalN}</span>`,
+      `<span class="badge blue">Semilla ${c.semilla}</span>`,
+      c.escenario !== 'base' ? `<span class="badge yellow">Escenario: ${traducirEscenario(c.escenario)}</span>` : '',
+      `<span class="badge purple">α = ${c.alpha}</span>`
+    ].join('');
+
+    const tablaFactores = `
+      <table>
+        <tr><th>Factor</th><th>Niveles</th><th>Medias DGP</th><th>k niveles</th></tr>
+        ${c.factores.map(f => `
+          <tr>
+            <td>${escapar(f.nombre)}</td>
+            <td>${f.niveles.map(n=>escapar(n.nombre)).join(', ')}</td>
+            <td>${f.niveles.map(n=>n.media.toFixed(1)).join(', ')}</td>
+            <td>${f.niveles.length}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `;
+
+    const supuestos = [
+      'La variable respuesta es continua y aproximadamente normal dentro de cada grupo.',
+      'Las observaciones son independientes (diseño aleatorizado).',
+      'Las varianzas dentro de cada grupo son iguales (homocedasticidad); se verifica con Levene.',
+      'Los coeficientes de tratamiento suman cero (Σα_i = 0) — restricción de efectos.',
+      'La simulación usa un DGP lineal: Y_ij = μ + α_i [+ β_j + (αβ)_ij] + ε_ij.',
+      'Los errores simulados son i.i.d. con la distribución seleccionada.'
+    ];
+
+    if (c.escenario === 'hetero') supuestos.push('ESCENARIO INDUCIDO: varianzas distintas por grupo (σ_i proporcional al rango del grupo). Usar Welch o Games-Howell post-hoc.');
+    if (c.escenario === 'noNormal') supuestos.push('ESCENARIO INDUCIDO: errores con distribución asimétrica. Considerar Kruskal-Wallis como alternativa.');
+    if (c.escenario === 'outliers') supuestos.push('ESCENARIO INDUCIDO: outliers añadidos en algunos grupos. Revisar Cook\'s D y leverage.');
+    if (c.escenario === 'efectoNulo') supuestos.push('ESCENARIO INDUCIDO: todas las medias son iguales (μ_i = μ). Útil para practicar control del error de Tipo I.');
+
+    return `
+      <h3>Diseño y modelo recomendado</h3>
+      <div class="alert info"><strong>Diseño:</strong> ${escapar(nombreModelo)}<br>
+        <strong>Modelo:</strong> ${escapar(modeloFormula(c))}
+      </div>
+      <div>${badgesHtml}</div>
+
+      <h3>Factores y DGP</h3>
+      ${tablaFactores}
+
+      <h3>Proceso de construcción de la simulación</h3>
+      ${pasos.map((p,i)=>`<div class="step"><strong>Paso ${i+1}:</strong> ${p}</div>`).join('')}
+
+      <h3>Supuestos explícitos del DGP</h3>
+      <ul>${supuestos.map(s=>`<li>${escapar(s)}</li>`).join('')}</ul>
+    `;
+  }
+
+  function nombreDiseno(c) {
+    const tipos = {
+      unifactorial: 'ANOVA Unifactorial (CRD)',
+      'factorial2x': `ANOVA Factorial ${c.factores.map(f=>f.niveles.length).join('×')} con interacción`,
+      bloques: 'ANOVA en Bloques Completos Aleatorizados (DBCA)',
+      repetidas: 'ANOVA de Medidas Repetidas (within-subjects)'
+    };
+    return tipos[c.tipo] || c.tipo;
+  }
+
+  function modeloFormula(c) {
+    if (c.factores.length === 1) {
+      return `${c.yNombre} ~ C(${c.factores[0].nombre})`;
+    }
+    const f = c.factores.map(f=>`C(${f.nombre})`).join(' * ');
+    return `${c.yNombre} ~ ${f}`;
+  }
+
+  function traducirEscenario(e) {
+    const d = { base:'Base', hetero:'Heterocedasticidad', noNormal:'No normalidad', outliers:'Outliers', efectoNulo:'Efecto nulo' };
+    return d[e] || e;
+  }
+
+  // ── Checklist ─────────────────────────────────────────────
+  function generarChecklist(c) {
+    const items = [
+      'Verificar que el diseño (tipo, factores, niveles) corresponde a la pregunta de investigación.',
+      'Declarar DGP: medias por nivel, σ intragrupo, semilla y N por celda.',
+      'Generar el dataset y revisar descriptivos por celda (n, media, DE).',
+      'Construir boxplots por grupo para inspección visual previa.',
+      `Ajustar el modelo: ${escapar(modeloFormula(c))}.`,
+      'Ejecutar prueba de Levene para homocedasticidad.',
+      'Ejecutar Shapiro-Wilk por grupo y sobre los residuos del modelo.',
+      'Revisar Q-Q plot y boxplot de residuos por grupo.',
+      'Si supuestos se cumplen: reportar F, gl, p y tamaño de efecto ω².',
+      'Si supuestos se violan: aplicar Welch ANOVA (heterocedasticidad) o Kruskal-Wallis (no normalidad).',
+      'Si F es significativo: aplicar Tukey HSD (homocedasticidad) o Games-Howell (heterocedasticidad).',
+      'Reportar diferencias por par con intervalos de confianza Tukey.',
+      'Calcular ω² y η² parcial; interpretar tamaño del efecto según umbrales de Cohen.',
+      c.factores.length > 1 ? 'Graficar interacción: si no es paralela, reportar efectos simples (simple effects analysis).' : null,
+      'Documentar conclusiones en el contexto sustantivo del proyecto.',
+      'Preparar tabla de resultados en formato APA: F(df_num, df_den), p, ω².'
+    ].filter(Boolean);
+
+    return `
+      <h3>Checklist de ejecución</h3>
+      <div>${items.map((it,i)=>`
+        <label class="checklist-item">
+          <input type="checkbox">
+          <span><strong>${i+1}.</strong> ${escapar(it)}</span>
+        </label>
+      `).join('')}</div>
+    `;
+  }
+
+  // ── Código ────────────────────────────────────────────────
+  function generarCodigo(c) {
+    let html = '<h3>Código generado</h3>';
+    if (c.lenguaje === 'python' || c.lenguaje === 'ambos') {
+      html += `<h3>Python / Google Colab</h3><div class="code-block">${escapar(codigoPython(c))}</div>`;
+    }
+    if (c.lenguaje === 'r' || c.lenguaje === 'ambos') {
+      html += `<h3>R</h3><div class="code-block">${escapar(codigoR(c))}</div>`;
+    }
+    return html;
+  }
+
+  function codigoPython(c) {
+    const Y   = c.yNombre;
+    const F0  = c.factores[0];
+    const F1  = c.factores.length > 1 ? c.factores[1] : null;
+    const hasFac = c.factores.length > 1;
+    const formula = hasFac
+      ? `'${Y} ~ C(${F0.nombre}) * C(${F1.nombre})'`
+      : `'${Y} ~ C(${F0.nombre})'`;
+
+    let code = `# ============================================================
+# SIMULACIÓN ANOVA — Generado por Instrumento Sprint 3
+# Diseño: ${nombreDiseno(c)}
+# Variable Y: ${Y} [${c.yUnidad}]
+# ============================================================
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from scipy.stats import shapiro, levene, f_oneway, kruskal
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.stats.anova import anova_lm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+import warnings
+warnings.filterwarnings("ignore")
+
+np.random.seed(${c.semilla})
+n_por_celda = ${c.n}
+sigma       = ${c.sigma}
+alpha       = ${c.alpha}
+
+# ── 1. GENERACIÓN DE DATOS ──────────────────────────────────
+registros = []
+`;
+
+    if (!hasFac) {
+      code += `medias_dgp = {\n`;
+      F0.niveles.forEach(n => { code += `    '${n.nombre}': ${n.media},\n`; });
+      code += `}\n\n`;
+      code += `for nivel, mu in medias_dgp.items():\n`;
+
+      if (c.escenario === 'hetero') {
+        code += `    # Heterocedasticidad: σ varía con el índice del nivel\n`;
+        code += `    idx = list(medias_dgp).index(nivel)\n`;
+        code += `    sigma_i = sigma * (1 + 0.5 * idx)\n`;
+      } else if (c.escenario === 'noNormal') {
+        code += `    sigma_i = sigma\n`;
+      } else {
+        code += `    sigma_i = sigma\n`;
+      }
+
+      if (c.escenario === 'noNormal') {
+        code += `    valores = np.random.gamma(shape=(mu/sigma)**2, scale=sigma**2/mu, size=n_por_celda)\n`;
+      } else {
+        code += `    valores = np.random.normal(mu, sigma_i, n_por_celda)\n`;
+      }
+
+      code += `    for v in valores:\n`;
+      code += `        registros.append({'${F0.nombre}': nivel, '${Y}': round(float(max(v, 0.1)), 3)})\n\n`;
+      code += `df = pd.DataFrame(registros)\n`;
+      code += `df['${F0.nombre}'] = pd.Categorical(df['${F0.nombre}'],\n`;
+      code += `    categories=${JSON.stringify(F0.niveles.map(n=>n.nombre))}, ordered=True)\n\n`;
+    } else {
+      code += `medias_dgp = {\n`;
+      F0.niveles.forEach(nA => {
+        F1.niveles.forEach(nB => {
+          const mediaAB = nA.media + nB.media;
+          code += `    ('${nA.nombre}', '${nB.nombre}'): ${mediaAB.toFixed(1)},\n`;
+        });
+      });
+      code += `}\n\n`;
+      code += `for (niv_A, niv_B), mu in medias_dgp.items():\n`;
+      if (c.escenario === 'hetero') {
+        code += `    idx = list(medias_dgp).index((niv_A, niv_B))\n`;
+        code += `    sigma_i = sigma * (1 + 0.3 * idx)\n`;
+      } else {
+        code += `    sigma_i = sigma\n`;
+      }
+      if (c.escenario === 'noNormal') {
+        code += `    valores = np.random.gamma(shape=max((mu/sigma)**2, 1), scale=sigma**2/max(mu,1), size=n_por_celda)\n`;
+      } else {
+        code += `    valores = np.random.normal(mu, sigma_i, n_por_celda)\n`;
+      }
+      code += `    for v in valores:\n`;
+      code += `        registros.append({'${F0.nombre}': niv_A, '${F1.nombre}': niv_B, '${Y}': round(float(max(v,0.1)),3)})\n\n`;
+      code += `df = pd.DataFrame(registros)\n`;
+      code += `df['${F0.nombre}'] = pd.Categorical(df['${F0.nombre}'],\n`;
+      code += `    categories=${JSON.stringify(F0.niveles.map(n=>n.nombre))}, ordered=True)\n\n`;
+    }
+
+    if (c.escenario === 'outliers') {
+      code += `# Añadir outliers en algunos grupos\nids_out = np.random.choice(df.index, size=max(3, int(len(df)*0.03)), replace=False)\ndf.loc[ids_out, '${Y}'] += 3.5 * df['${Y}'].std()\nprint("Outliers inducidos en índices:", ids_out.tolist())\n\n`;
+    }
+
+    if (c.escenario === 'efectoNulo') {
+      code += `# Escenario efecto nulo: todas las medias = gran media\ngrand_mean = df['${Y}'].mean()\ndf['${Y}'] = grand_mean + (df['${Y}'] - df.groupby('${F0.nombre}', observed=True)['${Y}'].transform('mean'))\n\n`;
+    }
+
+    code += `print("Dataset generado:", df.shape)
+print(df.groupby('${F0.nombre}', observed=True)['${Y}'].agg(['mean','std','count']).round(2))
+
+# ── 2. EXPLORACIÓN VISUAL ───────────────────────────────────
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+sns.boxplot(x='${F0.nombre}', y='${Y}', data=df,
+            order=${JSON.stringify(F0.niveles.map(n=>n.nombre))},
+            palette='Set2', ax=axes[0])
+`;
+    if (hasFac) {
+      code += `sns.boxplot(x='${F0.nombre}', y='${Y}', hue='${F1.nombre}',
+            data=df, order=${JSON.stringify(F0.niveles.map(n=>n.nombre))},
+            palette='Set1', ax=axes[1])
+axes[1].set_title('Diseño Factorial')
+`;
+    } else {
+      code += `sns.stripplot(x='${F0.nombre}', y='${Y}', data=df, color='black', alpha=0.3, ax=axes[0])
+axes[1].hist(df['${Y}'], bins=20, color='steelblue', edgecolor='white')
+axes[1].set_title('Distribución de Y')
+`;
+    }
+    code += `axes[0].set_title('Distribución por Grupo(s)')
+plt.tight_layout(); plt.show()
+
+# ── 3. AJUSTE DEL MODELO ANOVA ──────────────────────────────
+modelo = smf.ols(${formula}, data=df).fit()
+tabla  = anova_lm(modelo, typ=${hasFac ? 2 : 1})
+print("\\n=== TABLA ANOVA ===")
+print(tabla.round(4))
+
+# ── 4. DIAGNÓSTICO DE SUPUESTOS ─────────────────────────────
+resid  = modelo.resid
+fitted = modelo.fittedvalues
+
+grupos = [g['${Y}'].values for _, g in df.groupby('${F0.nombre}', observed=True)]
+L_stat, L_p = levene(*grupos)
+W_stat, W_p = shapiro(resid)
+
+print(f"\\nLevene  (Homocedasticidad): F={L_stat:.3f}, p={L_p:.4f} {'→ OK' if L_p>{c.alpha} else '→ VIOLADO'}")
+print(f"Shapiro-Wilk (Normalidad):  W={W_stat:.4f}, p={W_p:.4f} {'→ OK' if W_p>{c.alpha} else '→ VIOLADO'}")
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+sm.qqplot(resid, line='45', fit=True, ax=axes[0], alpha=0.5)
+axes[0].set_title('Q-Q Plot de Residuos')
+axes[1].scatter(fitted, resid, alpha=0.5, color='steelblue')
+axes[1].axhline(0, color='red', linestyle='--')
+axes[1].set_xlabel('Valores Ajustados'); axes[1].set_ylabel('Residuos')
+axes[1].set_title('Residuos vs Ajustados')
+plt.tight_layout(); plt.show()
+
+# Alternativa no paramétrica
+H_stat, H_p = kruskal(*grupos)
+print(f"Kruskal-Wallis (alt. no param.): H={H_stat:.3f}, p={H_p:.4f}")
+
+# ── 5. POST-HOC: TUKEY HSD ──────────────────────────────────
+from scipy.stats import f
+F_val  = tabla.iloc[0]['F']
+df_num = int(tabla.iloc[0]['df'])
+df_den = int(tabla.loc['Residual','df'])
+p_F    = tabla.iloc[0]['PR(>F)']
+
+if p_F < ${c.alpha}:
+    print("\\n=== POST-HOC: TUKEY HSD ===")
+    tukey = pairwise_tukeyhsd(endog=df['${Y}'], groups=df['${F0.nombre}'], alpha=${c.alpha})
+    print(tukey.summary())
+else:
+    print("\\nF no significativo → No se aplican pruebas post-hoc (H₀ no rechazada).")
+
+# ── 6. TAMAÑO DEL EFECTO ─────────────────────────────────────
+SS_A = tabla.iloc[0]['sum_sq']
+SS_E = tabla.loc['Residual','sum_sq']
+MS_E = tabla.loc['Residual','mean_sq']
+SS_T = SS_A + SS_E
+k    = df['${F0.nombre}'].nunique()
+
+eta2   = SS_A / SS_T
+omega2 = (SS_A - (k-1)*MS_E) / (SS_T + MS_E)
+print(f"\\nη²  = {eta2:.4f}  {'[Grande]' if eta2>=0.14 else '[Mediano]' if eta2>=0.06 else '[Pequeño]'}")
+print(f"ω²  = {omega2:.4f} {'[Grande]' if omega2>=0.14 else '[Mediano]' if omega2>=0.06 else '[Pequeño]'}  (preferir ω², insesgado)")
+`;
+    return code;
+  }
+
+  function codigoR(c) {
+    const Y  = c.yNombre;
+    const F0 = c.factores[0];
+    const F1 = c.factores.length > 1 ? c.factores[1] : null;
+    const hasFac = c.factores.length > 1;
+    const formula = hasFac
+      ? `${Y} ~ ${F0.nombre} * ${F1.nombre}`
+      : `${Y} ~ ${F0.nombre}`;
+
+    let code = `# ============================================================
+# SIMULACIÓN ANOVA EN R — Generado por Instrumento Sprint 3
+# Diseño: ${nombreDiseno(c)} | Y: ${Y} [${c.yUnidad}]
+# ============================================================
+
+set.seed(${c.semilla})
+library(ggplot2)
+library(car)      # Para Levene
+library(emmeans)  # Para Tukey post-hoc
+library(effectsize) # Para eta2 y omega2
+
+n_por_celda <- ${c.n}
+sigma       <- ${c.sigma}
+
+# ── 1. GENERACIÓN DE DATOS ──────────────────────────────────
+datos <- data.frame()
+`;
+    if (!hasFac) {
+      code += `medias <- c(${F0.niveles.map(n=>`${n.nombre}=${n.media}`).join(', ')})\n\n`;
+      code += `for (nivel in names(medias)) {\n  Y_vals <- rnorm(n_por_celda, medias[nivel], sigma)\n  datos <- rbind(datos, data.frame(${F0.nombre}=nivel, ${Y}=Y_vals))\n}\n`;
+    } else {
+      code += `medias_lista <- list(\n`;
+      F0.niveles.forEach(nA => {
+        F1.niveles.forEach(nB => {
+          const mediaAB = nA.media + nB.media;
+          code += `  list(${F0.nombre}='${nA.nombre}', ${F1.nombre}='${nB.nombre}', mu=${mediaAB.toFixed(1)}),\n`;
+        });
+      });
+      code += `)\n\nfor (celda in medias_lista) {\n  Y_vals <- rnorm(n_por_celda, celda$mu, sigma)\n  datos <- rbind(datos, data.frame(${F0.nombre}=celda$${F0.nombre}, ${F1.nombre}=celda$${F1.nombre}, ${Y}=Y_vals))\n}\n`;
+    }
+
+    code += `
+datos$${F0.nombre} <- factor(datos$${F0.nombre}, levels=${JSON.stringify(F0.niveles.map(n=>n.nombre))})
+str(datos)
+summary(datos)
+
+# ── 2. AJUSTE DEL MODELO ────────────────────────────────────
+modelo <- aov(${formula}, data = datos)
+print(summary(modelo))
+
+# ── 3. DIAGNÓSTICOS ─────────────────────────────────────────
+par(mfrow = c(2, 2))
+plot(modelo)
+par(mfrow = c(1, 1))
+
+# Levene y Shapiro
+leveneTest(${Y} ~ ${F0.nombre}, data = datos)
+shapiro.test(residuals(modelo))
+
+# ── 4. POST-HOC TUKEY ───────────────────────────────────────
+TukeyHSD(modelo, '${F0.nombre}', conf.level = 1 - ${c.alpha})
+
+# Usando emmeans (más flexible):
+emm <- emmeans(modelo, ~ ${F0.nombre})
+pairs(emm, adjust = "tukey")
+
+# ── 5. TAMAÑO DEL EFECTO ────────────────────────────────────
+eta_squared(modelo)
+omega_squared(modelo)
+
+# ── 6. VISUALIZACIÓN ────────────────────────────────────────
+ggplot(datos, aes(x = ${F0.nombre}, y = ${Y}${hasFac ? `, fill = ${F1.nombre}` : ''})) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.15, alpha = 0.3) +
+  labs(title = "Distribución de ${Y} por Grupo", x = "${F0.nombre}", y = "${Y} (${c.yUnidad})") +
+  theme_bw()
+`;
+    return code;
+  }
+
+  inicializar();
+</script>
+</body>
+</html>

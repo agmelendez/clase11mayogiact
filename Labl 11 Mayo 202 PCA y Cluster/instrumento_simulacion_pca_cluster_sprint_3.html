@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Simulador PCA y Clúster — Sprint 3</title><style>
+:root{--azul:#005da4;--azul-oscuro:#003f73;--celeste:#e8f3fb;--fondo:#f4f6f8;--borde:#d7dee5;--texto:#1f2933;--verde:#1b8a5a;--amarillo:#b7791f;--rojo:#b83232;--morado:#5b4b8a;--blanco:#fff;--code:#1f2933}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--texto);line-height:1.55}header{background:linear-gradient(135deg,var(--azul),var(--azul-oscuro));color:#fff;padding:28px 36px;border-bottom:6px solid #f2c94c}header h1{margin:0 0 8px;font-size:2rem}header p{max-width:1180px;margin:0;opacity:.95}main{max-width:1360px;margin:26px auto;padding:0 20px 42px;display:grid;grid-template-columns:1fr 1fr;gap:24px}@media(max-width:1050px){main{grid-template-columns:1fr}.result-panel{position:static!important}}.full{grid-column:1/-1}.card{background:var(--blanco);border:1px solid var(--borde);border-radius:16px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.06);margin-bottom:22px}.card h2{color:var(--azul);margin-top:0;border-bottom:2px solid var(--celeste);padding-bottom:8px;font-size:1.35rem}.card h3{color:var(--azul-oscuro);margin-top:22px;font-size:1.08rem}label{display:block;font-weight:bold;margin:12px 0 6px}input,select,textarea{width:100%;padding:10px 12px;border:1px solid #b9c4cf;border-radius:10px;font-size:.95rem;color:var(--texto);background:#fff}textarea{min-height:92px;resize:vertical}.row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}@media(max-width:820px){.row,.row-3,.row-4{grid-template-columns:1fr}}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}button,.btn{border:none;border-radius:12px;padding:12px 16px;font-weight:bold;cursor:pointer;transition:.2s ease;font-size:.95rem;text-decoration:none;display:inline-block}button.primary,.btn.primary{background:var(--azul);color:#fff}button.secondary,.btn.secondary{background:#e6edf3;color:#233}button.warning{background:#f6ad55;color:#2d1600}button.danger{background:#fde2e2;color:var(--rojo)}button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 6px 12px rgba(0,0,0,.10)}.result-panel{position:sticky;top:18px}.alert{padding:12px 14px;border-radius:12px;margin:10px 0;border:1px solid transparent}.alert.ok{background:#eefaf3;border-color:#b7e4c7}.alert.warn{background:#fff8e1;border-color:#f5d57a}.alert.danger{background:#fdecec;border-color:#f5b5b5}.alert.info{background:var(--celeste);border-color:#b7d7ee}.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:bold;font-size:.85rem;margin:4px 4px 4px 0}.badge.blue{background:var(--celeste);color:var(--azul)}.badge.green{background:#dff5e8;color:var(--verde)}.badge.yellow{background:#fff4d6;color:var(--amarillo)}.badge.red{background:#fde2e2;color:var(--rojo)}.badge.purple{background:#eee9ff;color:var(--morado)}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem}th,td{border:1px solid var(--borde);padding:9px;text-align:left;vertical-align:top}th{background:var(--celeste);color:var(--azul-oscuro)}.code-block,pre{background:var(--code);color:#e6edf3;padding:14px;border-radius:12px;overflow-x:auto;font-family:Consolas,Monaco,monospace;font-size:.85rem;white-space:pre-wrap;max-height:760px}.small{font-size:.88rem;color:#52616f}.help{display:block;margin-top:6px;font-size:.82rem;line-height:1.35;color:#52616f;font-weight:normal}.var-box{border:1px dashed #9db4c8;background:#fbfdff;padding:14px;border-radius:14px;margin-top:12px}.option{border:1px solid var(--borde);border-radius:12px;padding:10px;background:#fbfdff;display:flex;gap:8px;align-items:center}.option input{width:auto}.check-grid,.radio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.print-note{display:none}@media print{body{background:#fff}header,.actions,.no-print{display:none!important}main{display:block;margin:0;padding:0}.card{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}.result-panel{position:static}.print-note{display:block;font-weight:bold;margin-bottom:12px}.code-block{max-height:none}}
+</style></head><body><header><h1>Instrumento de Simulación PCA + Clúster — Sprint 3</h1><p>Genera datos sintéticos, código reproducible e interpretación metodológica para análisis de componentes principales y clúster aplicado a gestión marina costera.</p></header><main><div class="full no-print actions"><a class="btn secondary" href="index.html">← Volver al laboratorio principal</a><a class="btn secondary" href="clasificador_pca_cluster_maestria.html">← Volver al clasificador</a></div><section><div class="card"><h2>1. Entrada desde el clasificador</h2><p class="small">Pegue el JSON generado por el clasificador. Si no lo tiene, puede cargar una plantilla base.</p><label for="entrada">JSON o lista de variables</label><textarea id="entrada" style="min-height:260px;font-family:Consolas,monospace"></textarea><div class="actions"><button class="primary" onclick="leerEntrada()">Leer entrada</button><button class="secondary" onclick="cargarPlantilla()">Cargar plantilla base</button></div></div><div class="card"><h2>2. Parámetros de simulación</h2><div class="row-3"><div><label for="nSim">N simulado</label><input id="nSim" type="number" value="180" min="20"><span class="help">Número de casos sintéticos.</span></div><div><label for="semilla">Semilla</label><input id="semilla" type="number" value="123"><span class="help">Permite reproducibilidad.</span></div><div><label for="varianza">Varianza mínima acumulada PCA</label><input id="varianza" type="number" value="0.75" step="0.01" min="0.5" max="0.95"><span class="help">Umbral para retener componentes.</span></div></div><div class="row-3"><div><label for="escenario">Escenario</label><select id="escenario"><option value="base">Base: estructura clara</option><option value="ruido">Más ruido / estructura débil</option><option value="outliers">Con outliers</option><option value="clusters_solapados">Clústeres solapados</option><option value="faltantes">Con datos faltantes</option></select></div><div><label for="kmin">K mínimo</label><input id="kmin" type="number" value="2" min="2"></div><div><label for="kmax">K máximo</label><input id="kmax" type="number" value="7" min="3"></div></div><label for="lenguaje">Lenguaje de salida</label><select id="lenguaje"><option value="python">Python / Google Colab</option><option value="r">R</option><option value="ambos">R + Python</option></select></div><div class="card"><h2>3. Variables</h2><div id="vars"></div><div class="actions"><button class="secondary" onclick="agregarVariable()">+ Agregar variable</button><button class="primary" onclick="generar()">Generar simulación y código</button><button class="warning" onclick="window.print()">Imprimir / guardar PDF</button></div></div></section><aside class="result-panel"><div class="card"><p class="print-note">Reporte generado por Instrumento de Simulación PCA + Clúster — Sprint 3</p><h2>Resultado</h2><div id="resultado" class="alert info">Pegue la salida del clasificador, revise parámetros y genere el código.</div><div id="codigo"></div></div></aside></main><script>
+let config = null;
+let variables = [];
+
+const plantilla = {
+  tipo: 'pca_cluster',
+  metodo: 'PCA + clúster sobre puntuaciones factoriales',
+  unidad: 'Comunidades costeras',
+  pregunta: '¿Qué perfiles territoriales se observan?',
+  contexto: 'Gestión marina costera basada en indicadores ambientales, socioeconómicos y de gobernanza.',
+  n_muestra: 180,
+  variables: [
+    {nombre:'presion_turistica', nombre_limpio:'presion_turistica', unidad:'Índice 0-100', direccion:'presion', justificacion:'Presión turística'},
+    {nombre:'esfuerzo_pesquero', nombre_limpio:'esfuerzo_pesquero', unidad:'Índice 0-100', direccion:'presion', justificacion:'Intensidad pesquera'},
+    {nombre:'calidad_agua', nombre_limpio:'calidad_agua', unidad:'Índice 0-100', direccion:'condicion', justificacion:'Condición ambiental'},
+    {nombre:'biodiversidad', nombre_limpio:'biodiversidad', unidad:'Índice 0-100', direccion:'condicion', justificacion:'Integridad ecológica'},
+    {nombre:'gobernanza_local', nombre_limpio:'gobernanza_local', unidad:'Índice 0-100', direccion:'capacidad', justificacion:'Gestión local'},
+    {nombre:'cumplimiento_normativo', nombre_limpio:'cumplimiento_normativo', unidad:'Índice 0-100', direccion:'capacidad', justificacion:'Reglas de manejo'},
+    {nombre:'conflictividad', nombre_limpio:'conflictividad', unidad:'Índice 0-100', direccion:'presion', justificacion:'Conflictos socioambientales'},
+    {nombre:'infraestructura', nombre_limpio:'infraestructura', unidad:'Índice 0-100', direccion:'capacidad', justificacion:'Soporte territorial'}
+  ],
+  problemas: ['escalas','correlacion'],
+  recomendaciones: []
+};
+
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function clean(s){ let x=String(s ?? 'variable').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_]+/g,'_').replace(/^_+|_+$/g,'').toLowerCase(); return x || 'variable'; }
+function deduplicarNombre(nombre, usados){ let base=clean(nombre), candidato=base, i=2; while(usados.has(candidato)){ candidato=`${base}_${i}`; i++; } usados.add(candidato); return candidato; }
+function inferirRol(nombre, direccion){ const d=String(direccion||'').toLowerCase(); if(['presion','condicion','capacidad','contexto'].includes(d)) return d; const n=clean(nombre); if(/presion|esfuerzo|conflict|riesgo|contamina|impacto|amenaza/.test(n)) return 'presion'; if(/gobern|cumpl|infra|capacidad|gestion|participa|monitoreo/.test(n)) return 'capacidad'; if(/calidad|biodivers|condicion|ecosistema|salud|cobertura/.test(n)) return 'condicion'; return 'contexto'; }
+function normalizarVariable(v, usados){ const o=typeof v==='string'?{nombre:v}:(v||{}); const nombre=deduplicarNombre(o.nombre_limpio||o.variable||o.nombre||`variable_${usados.size+1}`, usados); const media=Number.isFinite(Number(o.media))?Number(o.media):50; const sd=Number.isFinite(Number(o.sd))&&Number(o.sd)>0?Number(o.sd):15; return {nombre, direccion:inferirRol(nombre,o.direccion||o.rol), media, sd, peso:Number.isFinite(Number(o.peso))?Number(o.peso):1}; }
+
+function cargarPlantilla(){ document.getElementById('entrada').value=JSON.stringify(plantilla,null,2); leerEntrada(); }
+function leerEntrada(){
+  const txt=document.getElementById('entrada').value.trim(); const usados=new Set();
+  try{
+    const parsed=txt?JSON.parse(txt):plantilla; config=Array.isArray(parsed)?{variables:parsed,tipo:'pca_cluster'}:parsed;
+    const lista=Array.isArray(config.variables)?config.variables:[]; if(lista.length===0) throw new Error('Sin variables');
+    variables=lista.map(v=>normalizarVariable(v,usados));
+    document.getElementById('resultado').innerHTML=`<div class="alert ok"><strong>Entrada leída:</strong> ${variables.length} variables detectadas desde JSON.</div>`;
+  }catch(e){
+    const partes=txt.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
+    variables=(partes.length?partes:['presion_turistica','esfuerzo_pesquero','calidad_agua','gobernanza_local']).map(x=>normalizarVariable({nombre:x},usados));
+    config={tipo:'pca_cluster',metodo:'PCA + clúster',unidad:'Casos',contexto:'Análisis multivariado exploratorio'};
+    document.getElementById('resultado').innerHTML=`<div class="alert warn"><strong>Entrada tratada como lista simple.</strong> No se leyó como JSON válido, pero se recuperaron ${variables.length} variables.</div>`;
+  }
+  renderVars(); document.getElementById('codigo').innerHTML='';
+}
+function agregarVariable(){ const usados=new Set(variables.map(v=>v.nombre)); variables.push(normalizarVariable({nombre:`variable_${variables.length+1}`},usados)); renderVars(); }
+function actualizarNombre(i, valor){ variables[i].nombre=clean(valor); }
+function renderVars(){
+  const cont=document.getElementById('vars');
+  if(!variables.length){ cont.innerHTML='<div class="alert warn">No hay variables. Agregue al menos dos indicadores para generar PCA y clúster.</div>'; return; }
+  cont.innerHTML=variables.map((v,i)=>`
+    <div class="var-box"><div class="row-4">
+      <div><label>Variable</label><input value="${esc(v.nombre)}" oninput="actualizarNombre(${i}, this.value)"></div>
+      <div><label>Dirección</label><select onchange="variables[${i}].direccion=this.value">
+        <option value="presion" ${v.direccion==='presion'?'selected':''}>Presión</option><option value="condicion" ${v.direccion==='condicion'?'selected':''}>Condición</option><option value="capacidad" ${v.direccion==='capacidad'?'selected':''}>Capacidad</option><option value="contexto" ${v.direccion==='contexto'?'selected':''}>Contexto</option>
+      </select></div>
+      <div><label>Media</label><input type="number" value="${Number(v.media)}" oninput="variables[${i}].media=Number(this.value)"></div>
+      <div><label>Desv. est.</label><input type="number" min="0.01" step="0.01" value="${Number(v.sd)}" oninput="variables[${i}].sd=Number(this.value)"></div>
+    </div><div class="actions"><button class="danger" onclick="variables.splice(${i},1);renderVars()">Eliminar</button></div></div>`).join('');
+}
+function num(id, fallback){ const val=Number(document.getElementById(id).value); return Number.isFinite(val)?val:fallback; }
+function obtenerCfg(){ const usados=new Set(); const vars=variables.map(v=>normalizarVariable(v,usados)).filter(v=>v.nombre&&Number.isFinite(v.media)&&Number.isFinite(v.sd)&&v.sd>0); return {n:Math.max(20,Math.floor(num('nSim',180))), seed:Math.floor(num('semilla',123)), varianza:Math.min(0.95,Math.max(0.50,num('varianza',0.75))), escenario:document.getElementById('escenario').value, kmin:Math.max(2,Math.floor(num('kmin',2))), kmax:Math.max(3,Math.floor(num('kmax',7))), lenguaje:document.getElementById('lenguaje').value, variables:vars, contexto:(config&&config.contexto)||'Gestión marina costera'}; }
+function validarCfg(c){ const errores=[], advertencias=[]; if(c.variables.length<2) errores.push('Se requieren al menos 2 variables válidas para ejecutar PCA.'); if(c.variables.length<4) advertencias.push('PCA con menos de 4 variables puede aportar poco; considere clúster directo o agregue indicadores.'); if(c.n<5*c.variables.length) advertencias.push('La relación casos/variables es baja; interprete PCA y clúster con cautela.'); if(c.kmax<=c.kmin) errores.push('K máximo debe ser mayor que K mínimo.'); if(c.kmax>=c.n) errores.push('K máximo debe ser menor que el número de casos simulados.'); if(c.escenario==='outliers') advertencias.push('Se inyectarán casos extremos; compare resultados con y sin outliers.'); if(c.escenario==='faltantes') advertencias.push('Se inyectarán datos faltantes; el código imputará con medianas y reportará faltantes.'); return {errores,advertencias}; }
+function generar(){
+  const c=obtenerCfg(), val=validarCfg(c);
+  if(val.errores.length){ document.getElementById('resultado').innerHTML=val.errores.map(a=>`<div class="alert danger">${esc(a)}</div>`).join(''); document.getElementById('codigo').innerHTML=''; return; }
+  variables=c.variables; renderVars();
+  const tabla=`<table><tr><th>Variable</th><th>Rol</th><th>Media</th><th>DE</th></tr>${c.variables.map(v=>`<tr><td>${esc(v.nombre)}</td><td>${esc(v.direccion)}</td><td>${Number(v.media).toFixed(2)}</td><td>${Number(v.sd).toFixed(2)}</td></tr>`).join('')}</table>`;
+  document.getElementById('resultado').innerHTML=`<div class="alert ok"><strong>Simulación configurada:</strong> ${c.n} casos, ${c.variables.length} variables, retención PCA ${Math.round(c.varianza*100)}%.</div><h3>Variables simuladas</h3>${tabla}<h3>Interpretación esperada</h3><p>Reporte mínimo: varianza explicada por componente, cargas principales, componentes retenidos, comparación de k, silhouette, centroides, tamaño de grupos y etiqueta sustantiva de cada clúster.</p><p class="small">Supuesto operativo: PCA trabaja sobre variables cuantitativas estandarizadas; el clúster se calcula sobre puntuaciones PCA para reducir colinealidad y ruido.</p>${val.advertencias.map(a=>`<div class="alert warn">${esc(a)}</div>`).join('')}`;
+  let code=''; if(c.lenguaje==='python'||c.lenguaje==='ambos') code+=`### PYTHON / GOOGLE COLAB\n${generarPython(c)}\n\n`; if(c.lenguaje==='r'||c.lenguaje==='ambos') code+=`### R\n${generarR(c)}`;
+  document.getElementById('codigo').innerHTML=`<h3>Código reproducible</h3><div class="code-block" id="codeBlock">${esc(code)}</div><div class="actions"><button class="secondary" onclick="copiarCodigo()">Copiar código</button></div>`;
+}
+function copiarCodigo(){ const text=document.getElementById('codeBlock')?.innerText||''; if(navigator.clipboard&&window.isSecureContext){ navigator.clipboard.writeText(text).then(()=>document.getElementById('resultado').insertAdjacentHTML('afterbegin','<div class="alert ok">Código copiado al portapapeles.</div>')).catch(()=>fallbackCopy(text)); }else fallbackCopy(text); }
+function fallbackCopy(text){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); document.getElementById('resultado').insertAdjacentHTML('afterbegin','<div class="alert ok">Código copiado al portapapeles.</div>'); }
+function jsonRoles(c){ return JSON.stringify(Object.fromEntries(c.variables.map(v=>[v.nombre,v.direccion]))); }
+function generarPython(c){
+  const vars=JSON.stringify(c.variables.map(v=>v.nombre)); const means=JSON.stringify(Object.fromEntries(c.variables.map(v=>[v.nombre,Number(v.media)]))); const sds=JSON.stringify(Object.fromEntries(c.variables.map(v=>[v.nombre,Number(v.sd)]))); const roles=jsonRoles(c);
+  return `# -*- coding: utf-8 -*-
+# Laboratorio PCA + Clúster aplicado a gestión marina costera
+# Código autocontenido para Google Colab / Jupyter
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+seed = ${c.seed}
+rng = np.random.default_rng(seed)
+n = ${c.n}
+variables = ${vars}
+means = ${means}
+sds = ${sds}
+roles = ${roles}
+escenario = '${c.escenario}'
+kmin = ${c.kmin}
+kmax = ${c.kmax}
+umbral_varianza = ${c.varianza}
+
+# 1. Generación sintética con estructura latente y perfiles territoriales.
+k_latente = 3
+perfil = rng.integers(0, k_latente, size=n)
+centros = {
+    0: {'presion':  1.00, 'condicion': -0.70, 'capacidad': -0.40, 'contexto':  0.10},
+    1: {'presion': -0.50, 'condicion':  0.85, 'capacidad':  0.60, 'contexto':  0.00},
+    2: {'presion':  0.20, 'condicion':  0.10, 'capacidad': -0.10, 'contexto': -0.20},
+}
+ruido = {'base':0.55, 'ruido':1.05, 'outliers':0.65, 'clusters_solapados':1.35, 'faltantes':0.70}.get(escenario, 0.70)
+
+latent = pd.DataFrame(index=range(n))
+for rol in ['presion','condicion','capacidad','contexto']:
+    centro_rol = np.array([centros[int(g)][rol] for g in perfil])
+    latent[rol] = centro_rol + rng.normal(0, ruido, n)
+
+df = pd.DataFrame({'perfil_latente_simulado': perfil})
+for v in variables:
+    rol = roles.get(v, 'contexto')
+    base = latent[rol].to_numpy()
+    especifico = rng.normal(0, ruido, n)
+    valor = means.get(v, 50) + sds.get(v, 15) * (0.72*base + 0.28*especifico)
+    df[v] = np.clip(valor, 0, 100)
+
+if escenario == 'outliers':
+    n_out = max(3, int(0.04*n))
+    idx = rng.choice(df.index, n_out, replace=False)
+    subset = variables[:max(1, len(variables)//3)]
+    for v in subset:
+        df.loc[idx, v] = np.clip(df.loc[idx, v] + 3.0 * df[v].std(ddof=0), 0, 100)
+if escenario == 'faltantes':
+    mask = rng.random(df[variables].shape) < 0.06
+    df.loc[:, variables] = df[variables].mask(mask)
+
+print('Dimensión:', df.shape)
+print('\nFaltantes por variable:')
+print(df[variables].isna().sum())
+print('\nResumen descriptivo:')
+print(df[variables].describe().T.round(2))
+
+df_work = df[variables].copy()
+for col in variables:
+    if df_work[col].isna().all():
+        df_work[col] = means.get(col, 50)
+    else:
+        df_work[col] = df_work[col].fillna(df_work[col].median())
+
+scaler = StandardScaler()
+X = scaler.fit_transform(df_work)
+pca_full = PCA(random_state=seed).fit(X)
+var_ratio = pca_full.explained_variance_ratio_
+var_acum = np.cumsum(var_ratio)
+n_comp = int(np.argmax(var_acum >= umbral_varianza) + 1)
+n_comp = max(1, min(n_comp, len(variables)))
+
+pca = PCA(n_components=n_comp, random_state=seed).fit(X)
+scores = pca.transform(X)
+loadings = pd.DataFrame(pca.components_.T, index=variables, columns=[f'PC{i+1}' for i in range(n_comp)])
+print('\nVarianza explicada por componente:')
+print(pd.Series(var_ratio, index=[f'PC{i+1}' for i in range(len(var_ratio))]).round(3))
+print('\nVarianza acumulada:')
+print(pd.Series(var_acum, index=[f'PC{i+1}' for i in range(len(var_acum))]).round(3))
+print('\nComponentes retenidos:', n_comp)
+print('\nCargas PCA:')
+print(loadings.round(3))
+
+plt.figure(figsize=(8,5))
+plt.plot(range(1, len(var_ratio)+1), var_acum, marker='o')
+plt.axhline(umbral_varianza, linestyle='--')
+plt.xlabel('Número de componentes')
+plt.ylabel('Varianza acumulada')
+plt.title('Scree plot: varianza acumulada PCA')
+plt.grid(True, alpha=0.3)
+plt.show()
+
+metricas = []
+for k in range(kmin, kmax + 1):
+    if k >= len(scores):
+        continue
+    labels_k = KMeans(n_clusters=k, n_init=50, random_state=seed).fit_predict(scores)
+    metricas.append({'k': k, 'silhouette': silhouette_score(scores, labels_k), 'calinski_harabasz': calinski_harabasz_score(scores, labels_k), 'davies_bouldin': davies_bouldin_score(scores, labels_k)})
+metricas = pd.DataFrame(metricas)
+print('\nMétricas para seleccionar K:')
+print(metricas.round(3))
+if metricas.empty:
+    raise ValueError('No hay valores válidos de k. Revise kmin, kmax y n.')
+k_opt = int(metricas.loc[metricas['silhouette'].idxmax(), 'k'])
+
+kmeans = KMeans(n_clusters=k_opt, n_init=100, random_state=seed)
+df['cluster'] = kmeans.fit_predict(scores)
+print('\nK óptimo por silhouette:', k_opt)
+print('\nTamaño de clústeres:')
+print(df['cluster'].value_counts().sort_index())
+print('\nCentroides en variables originales:')
+centroides = df.groupby('cluster')[variables].mean().round(2)
+print(centroides)
+
+prom_global = df[variables].mean()
+etiquetas = []
+for cl, row in centroides.iterrows():
+    alto = (row - prom_global).sort_values(ascending=False).head(2).index.tolist()
+    bajo = (row - prom_global).sort_values().head(2).index.tolist()
+    etiquetas.append({'cluster': cl, 'rasgos_altos': ', '.join(alto), 'rasgos_bajos': ', '.join(bajo)})
+print('\nSugerencia inicial de etiquetas sustantivas:')
+print(pd.DataFrame(etiquetas))
+
+pc2 = scores[:,1] if n_comp > 1 else np.zeros(n)
+plt.figure(figsize=(8,6))
+plt.scatter(scores[:,0], pc2, c=df['cluster'], alpha=0.75)
+plt.xlabel('PC1')
+plt.ylabel('PC2' if n_comp > 1 else '0')
+plt.title('Clústeres proyectados sobre PCA')
+plt.grid(True, alpha=0.3)
+plt.show()
+
+Z = linkage(scores, method='ward')
+plt.figure(figsize=(10,5))
+dendrogram(Z, truncate_mode='lastp', p=min(20, n))
+plt.title('Dendrograma jerárquico sobre scores PCA')
+plt.xlabel('Grupos agregados')
+plt.ylabel('Distancia de Ward')
+plt.show()
+
+print('\nInterpretación sugerida:')
+print('- Nombrar PC1, PC2, etc. con las variables de mayor carga absoluta.')
+print('- Usar los centroides para etiquetar clústeres: alta presión, buena condición, baja capacidad, etc.')
+print('- Validar los grupos con conocimiento territorial antes de proponer decisiones de manejo.')
+print('- Reportar sensibilidad: escenarios con ruido, outliers y faltantes pueden cambiar K y centroides.')`;
+}
+function generarR(c){
+  const vars='c('+c.variables.map(v=>'"'+v.nombre+'"').join(', ')+')'; const means='c('+c.variables.map(v=>v.nombre+'='+Number(v.media)).join(', ')+')'; const sds='c('+c.variables.map(v=>v.nombre+'='+Number(v.sd)).join(', ')+')'; const roles='c('+c.variables.map(v=>v.nombre+'="'+v.direccion+'"').join(', ')+')';
+  return `# Laboratorio PCA + Clúster en R
+set.seed(${c.seed})
+n <- ${c.n}
+variables <- ${vars}
+means <- ${means}
+sds <- ${sds}
+roles <- ${roles}
+escenario <- '${c.escenario}'
+kmin <- ${c.kmin}
+kmax <- ${c.kmax}
+umbral_varianza <- ${c.varianza}
+if(!requireNamespace('cluster', quietly=TRUE)) install.packages('cluster')
+
+perfil <- sample(0:2, n, replace=TRUE)
+centros <- list('0'=c(presion=1.00, condicion=-0.70, capacidad=-0.40, contexto=0.10),'1'=c(presion=-0.50, condicion=0.85, capacidad=0.60, contexto=0.00),'2'=c(presion=0.20, condicion=0.10, capacidad=-0.10, contexto=-0.20))
+ruido <- switch(escenario, base=0.55, ruido=1.05, outliers=0.65, clusters_solapados=1.35, faltantes=0.70, 0.70)
+df <- data.frame(perfil_latente_simulado=perfil)
+latent <- data.frame(presion=numeric(n), condicion=numeric(n), capacidad=numeric(n), contexto=numeric(n))
+for(rol in c('presion','condicion','capacidad','contexto')){ centro_rol <- sapply(perfil, function(g) centros[[as.character(g)]][rol]); latent[[rol]] <- centro_rol + rnorm(n, 0, ruido) }
+for(v in variables){ rol <- roles[[v]]; base <- latent[[rol]]; especifico <- rnorm(n, 0, ruido); valor <- means[[v]] + sds[[v]] * (0.72*base + 0.28*especifico); df[[v]] <- pmin(pmax(valor, 0), 100) }
+if(escenario == 'outliers'){ n_out <- max(3, floor(0.04*n)); idx <- sample(seq_len(n), n_out); subset <- variables[seq_len(max(1, floor(length(variables)/3)))]; for(v in subset) df[idx, v] <- pmin(df[idx, v] + 3.0*sd(df[[v]], na.rm=TRUE), 100) }
+if(escenario == 'faltantes'){ for(v in variables){ idx <- runif(n) < 0.06; df[idx, v] <- NA } }
+print(dim(df)); print(colSums(is.na(df[, variables, drop=FALSE])))
+df_work <- df[, variables, drop=FALSE]
+for(v in variables){ if(all(is.na(df_work[[v]]))) df_work[[v]] <- means[[v]]; df_work[[v]][is.na(df_work[[v]])] <- median(df_work[[v]], na.rm=TRUE) }
+X <- scale(df_work)
+pca_full <- prcomp(X, center=FALSE, scale.=FALSE)
+var_ratio <- pca_full$sdev^2 / sum(pca_full$sdev^2)
+var_acum <- cumsum(var_ratio)
+n_comp <- which(var_acum >= umbral_varianza)[1]
+n_comp <- max(1, min(n_comp, length(variables)))
+pca <- prcomp(X, center=FALSE, scale.=FALSE)
+scores <- pca$x[, 1:n_comp, drop=FALSE]
+print(round(var_acum, 3)); print(round(pca$rotation[, 1:n_comp, drop=FALSE], 3))
+metricas <- data.frame()
+for(k in kmin:kmax){ if(k >= nrow(scores)) next; km <- kmeans(scores, centers=k, nstart=50); sil <- cluster::silhouette(km$cluster, dist(scores)); metricas <- rbind(metricas, data.frame(k=k, silhouette=mean(sil[,3]))) }
+print(metricas)
+if(nrow(metricas)==0) stop('No hay valores válidos de k. Revise kmin, kmax y n.')
+k_opt <- metricas$k[which.max(metricas$silhouette)]
+km_final <- kmeans(scores, centers=k_opt, nstart=100)
+df$cluster <- km_final$cluster
+print(table(df$cluster)); print(aggregate(df[, variables], by=list(cluster=df$cluster), mean, na.rm=TRUE))
+plot(scores[,1], if(n_comp>1) scores[,2] else rep(0,n), col=df$cluster, pch=19, xlab='PC1', ylab=if(n_comp>1) 'PC2' else '0', main='Clústeres proyectados sobre PCA')`;
+}
+
+document.addEventListener('DOMContentLoaded', cargarPlantilla);
+
+</script></body></html>

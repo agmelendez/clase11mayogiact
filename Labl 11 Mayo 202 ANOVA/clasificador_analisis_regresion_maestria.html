@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clasificador de Análisis Estadístico - Sprint 3</title>
+  <style>
+    :root {
+      --azul-ucr: #005da4;
+      --azul-claro: #e8f3fb;
+      --celeste: #d9edf7;
+      --gris-fondo: #f4f6f8;
+      --gris-borde: #d7dee5;
+      --texto: #1f2933;
+      --verde: #1b8a5a;
+      --amarillo: #b7791f;
+      --rojo: #b83232;
+      --morado: #5b4b8a;
+      --blanco: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--gris-fondo);
+      color: var(--texto);
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--azul-ucr), #003f73);
+      color: white;
+      padding: 28px 36px;
+      border-bottom: 6px solid #f2c94c;
+    }
+
+    header h1 {
+      margin: 0 0 8px 0;
+      font-size: 2rem;
+    }
+
+    header p {
+      max-width: 1100px;
+      margin: 0;
+      font-size: 1rem;
+      opacity: 0.95;
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 28px auto;
+      padding: 0 20px 40px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--blanco);
+      border: 1px solid var(--gris-borde);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      margin-bottom: 22px;
+    }
+
+    .card h2 {
+      color: var(--azul-ucr);
+      margin-top: 0;
+      border-bottom: 2px solid var(--azul-claro);
+      padding-bottom: 8px;
+      font-size: 1.35rem;
+    }
+
+    .card h3 {
+      color: #003f73;
+      margin-top: 22px;
+      font-size: 1.08rem;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #b9c4cf;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: white;
+      color: var(--texto);
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .row,
+      .row-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .radio-grid,
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .option {
+      border: 1px solid var(--gris-borde);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfdff;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .option input {
+      transform: scale(1.1);
+    }
+
+    .var-box {
+      border: 1px dashed #9db4c8;
+      background: #fbfdff;
+      padding: 14px;
+      border-radius: 14px;
+      margin-top: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    button.primary {
+      background: var(--azul-ucr);
+      color: white;
+    }
+
+    button.secondary {
+      background: #e6edf3;
+      color: #233;
+    }
+
+    button.warning {
+      background: #f6ad55;
+      color: #2d1600;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.10);
+    }
+
+    .result-panel {
+      position: sticky;
+      top: 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin: 4px 4px 4px 0;
+    }
+
+    .badge.green { background: #dff5e8; color: var(--verde); }
+    .badge.yellow { background: #fff4d6; color: var(--amarillo); }
+    .badge.red { background: #fde2e2; color: var(--rojo); }
+    .badge.blue { background: var(--azul-claro); color: var(--azul-ucr); }
+    .badge.purple { background: #eee9ff; color: var(--morado); }
+
+    .classification {
+      border-left: 6px solid var(--azul-ucr);
+      background: var(--azul-claro);
+      padding: 14px;
+      border-radius: 12px;
+      margin: 12px 0;
+    }
+
+    .classification h3 {
+      margin-top: 0;
+    }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+      border: 1px solid transparent;
+    }
+
+    .alert.ok {
+      background: #eefaf3;
+      border-color: #b7e4c7;
+    }
+
+    .alert.warn {
+      background: #fff8e1;
+      border-color: #f5d57a;
+    }
+
+    .alert.danger {
+      background: #fdecec;
+      border-color: #f5b5b5;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .checklist-item input {
+      margin-top: 5px;
+    }
+
+    .small {
+      font-size: 0.88rem;
+      color: #52616f;
+    }
+
+    .code-block {
+      background: #1f2933;
+      color: #e6edf3;
+      padding: 14px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+    }
+
+    .test-box {
+      background: #f8fafc;
+      border: 1px solid var(--gris-borde);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: 14px;
+      font-size: 0.86rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border: 1px solid var(--gris-borde);
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--azul-claro);
+      color: #003f73;
+    }
+
+    .print-note {
+      display: none;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+      header, .actions, .no-print, .test-box {
+        display: none !important;
+      }
+      main {
+        display: block;
+        margin: 0;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+      }
+      .result-panel {
+        position: static;
+      }
+      .print-note {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Clasificador de Análisis Estadístico — Sprint 3</h1>
+    <p>
+      Herramienta para que estudiantes de maestría definan su pregunta de tesis, identifiquen su variable dependiente,
+      seleccionen variables independientes y reciban una recomendación inicial sobre el tipo de análisis, diagnósticos y entregables.
+    </p>
+  </header>
+
+  <main>
+    <div style="grid-column: 1 / -1; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+      <a href="index.html" style="display: inline-block; padding: 10px 16px; background-color: #003f73; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">← Volver al Laboratorio Principal</a>
+      <a href="instrumento_simulacion_regresion_sprint_3.html" style="display: inline-block; padding: 10px 16px; background-color: var(--azul-ucr); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Ir al Instrumento de Simulación →</a>
+    </div>
+    <section>
+      <div class="card">
+        <h2>1. Pregunta de tesis</h2>
+        <label for="pregunta">Pregunta orientadora</label>
+        <textarea id="pregunta">¿Cuáles son los factores socio-económicos, técnicos o ambientales que explican la variabilidad en mi variable Y?</textarea>
+
+        <label for="area">Área principal del problema</label>
+        <select id="area">
+          <option value="socioeconomica">Socio-económica</option>
+          <option value="tecnica">Técnica / tecnológica</option>
+          <option value="ambiental">Ambiental / territorial</option>
+          <option value="educativa">Educativa</option>
+          <option value="salud">Salud / bienestar</option>
+          <option value="gestion">Gestión / administración</option>
+          <option value="otra">Otra</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h2>2. Variable dependiente Y</h2>
+
+        <label for="yNombre">Nombre de la variable Y</label>
+        <input type="text" id="yNombre" placeholder="Ejemplo: ingreso mensual, satisfacción, presión ambiental, desempeño académico" />
+
+        <label>Tipo de variable Y</label>
+        <div class="radio-grid">
+          <label class="option"><input type="radio" name="yTipo" value="continua" checked /> Continua</label>
+          <label class="option"><input type="radio" name="yTipo" value="conteo" /> Conteo</label>
+          <label class="option"><input type="radio" name="yTipo" value="proporcion" /> Proporción</label>
+          <label class="option"><input type="radio" name="yTipo" value="binaria" /> Binaria</label>
+        </div>
+
+        <div class="row-3">
+          <div>
+            <label for="yMin">Rango mínimo</label>
+            <input type="number" id="yMin" placeholder="Min" />
+          </div>
+          <div>
+            <label for="yMax">Rango máximo</label>
+            <input type="number" id="yMax" placeholder="Max" />
+          </div>
+          <div>
+            <label for="yUnidad">Unidades</label>
+            <input type="text" id="yUnidad" placeholder="Colones, puntos, %, casos, índice" />
+          </div>
+        </div>
+
+        <label>Distribución esperada</label>
+        <div class="radio-grid">
+          <label class="option"><input type="radio" name="yDistribucion" value="normal" checked /> Normal / simétrica</label>
+          <label class="option"><input type="radio" name="yDistribucion" value="sesgada" /> Sesgada</label>
+          <label class="option"><input type="radio" name="yDistribucion" value="ceroInflada" /> Cero-inflada</label>
+          <label class="option"><input type="radio" name="yDistribucion" value="desconocida" /> Desconocida</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3. Variables independientes X</h2>
+        <p class="small">Incluya al menos tres variables explicativas. Para cada una indique si es numérica o categórica y por qué importa para la pregunta de tesis.</p>
+
+        <div id="variablesX"></div>
+
+        <div class="actions">
+          <button class="secondary" type="button" onclick="agregarVariableX()">+ Agregar otra X</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>4. Datos disponibles</h2>
+
+        <label>Fuente de datos</label>
+        <div class="radio-grid">
+          <label class="option"><input type="radio" name="fuente" value="propia" checked /> Propia</label>
+          <label class="option"><input type="radio" name="fuente" value="secundaria" /> Secundaria</label>
+          <label class="option"><input type="radio" name="fuente" value="simulados" /> Simulados</label>
+          <label class="option"><input type="radio" name="fuente" value="mixta" /> Mixta</label>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="nMuestra">N, tamaño de muestra</label>
+            <input type="number" id="nMuestra" placeholder="Ejemplo: 120" />
+          </div>
+          <div>
+            <label for="nivelAnalisis">Unidad de análisis</label>
+            <input type="text" id="nivelAnalisis" placeholder="Personas, empresas, hogares, cantones, instituciones" />
+          </div>
+        </div>
+
+        <label>Problemas conocidos</label>
+        <div class="check-grid">
+          <label class="option"><input type="checkbox" id="problemaAusentes" /> Datos ausentes</label>
+          <label class="option"><input type="checkbox" id="problemaOutliers" /> Outliers</label>
+          <label class="option"><input type="checkbox" id="problemaMuestra" /> Muestra pequeña</label>
+          <label class="option"><input type="checkbox" id="problemaCorrelacion" /> X muy correlacionadas</label>
+          <label class="option"><input type="checkbox" id="problemaCeros" /> Muchos ceros</label>
+          <label class="option"><input type="checkbox" id="problemaGrupos" /> Datos agrupados</label>
+        </div>
+
+        <label for="problemasTexto">Otros problemas o comentarios</label>
+        <textarea id="problemasTexto" placeholder="Ejemplo: variables con escalas distintas, medición aproximada, valores extremos, datos territoriales, etc."></textarea>
+
+        <div class="actions">
+          <button class="primary" type="button" onclick="clasificarAnalisis()">Clasificar análisis</button>
+          <button class="secondary" type="button" onclick="limpiarFormulario()">Limpiar</button>
+          <button class="warning" type="button" onclick="window.print()">Imprimir / guardar PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="result-panel">
+      <div class="card">
+        <p class="print-note">Reporte generado por el Clasificador de Análisis Estadístico — Sprint 3</p>
+        <h2>Resultado personalizado</h2>
+        <div id="resultadoInicial" class="alert warn">
+          Complete la ficha y presione <strong>Clasificar análisis</strong> para generar la recomendación.
+        </div>
+
+        <div id="resultadoClasificacion"></div>
+        <div id="resultadoChecklist"></div>
+        <div id="resultadoCodigo"></div>
+        <div id="resultadoTests" class="test-box no-print"></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let contadorX = 0;
+
+    function getRadioValue(name) {
+      const selected = document.querySelector(`input[name="${name}"]:checked`);
+      return selected ? selected.value : "";
+    }
+
+    function escapeAttr(texto) {
+      return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function agregarVariableX(nombre = "", tipo = "numerica", justificacion = "") {
+      contadorX += 1;
+      const contenedor = document.getElementById("variablesX");
+      const div = document.createElement("div");
+      div.className = "var-box";
+      div.dataset.varIndex = contadorX;
+      div.innerHTML = `
+        <h3>X${contadorX}</h3>
+        <label>Nombre de X${contadorX}</label>
+        <input type="text" class="xNombre" placeholder="Ejemplo: ingreso, educación, distancia, inversión" value="${escapeAttr(nombre)}">
+        <div class="row">
+          <div>
+            <label>Tipo</label>
+            <select class="xTipo">
+              <option value="numerica" ${tipo === "numerica" ? "selected" : ""}>Numérica</option>
+              <option value="categorica" ${tipo === "categorica" ? "selected" : ""}>Categórica</option>
+              <option value="ordinal" ${tipo === "ordinal" ? "selected" : ""}>Ordinal</option>
+              <option value="binaria" ${tipo === "binaria" ? "selected" : ""}>Binaria</option>
+            </select>
+          </div>
+          <div>
+            <label>Relación esperada</label>
+            <select class="xRelacion">
+              <option value="positiva">Positiva</option>
+              <option value="negativa">Negativa</option>
+              <option value="incierta">Incierta / exploratoria</option>
+            </select>
+          </div>
+        </div>
+        <label>¿Por qué importa esta variable?</label>
+        <textarea class="xJustificacion" placeholder="Explique su relevancia teórica o empírica">${escapar(justificacion)}</textarea>
+      `;
+      contenedor.appendChild(div);
+    }
+
+    function obtenerVariablesX() {
+      const cajas = document.querySelectorAll(".var-box");
+      return Array.from(cajas).map((box, index) => ({
+        indice: index + 1,
+        nombre: box.querySelector(".xNombre").value.trim() || `X${index + 1}`,
+        tipo: box.querySelector(".xTipo").value,
+        relacion: box.querySelector(".xRelacion").value,
+        justificacion: box.querySelector(".xJustificacion").value.trim()
+      }));
+    }
+
+    function clasificarAnalisis() {
+      const pregunta = document.getElementById("pregunta").value.trim();
+      const area = document.getElementById("area").value;
+      const yNombre = document.getElementById("yNombre").value.trim() || "Y";
+      const yTipo = getRadioValue("yTipo");
+      const yDistribucion = getRadioValue("yDistribucion");
+      const yMin = document.getElementById("yMin").value;
+      const yMax = document.getElementById("yMax").value;
+      const yUnidad = document.getElementById("yUnidad").value.trim() || "unidades de medición";
+      const fuente = getRadioValue("fuente");
+      const nMuestra = Number(document.getElementById("nMuestra").value || 0);
+      const unidad = document.getElementById("nivelAnalisis").value.trim() || "observaciones";
+      const problemasTexto = document.getElementById("problemasTexto").value.trim();
+      const variablesX = obtenerVariablesX();
+
+      const problemas = {
+        ausentes: document.getElementById("problemaAusentes").checked,
+        outliers: document.getElementById("problemaOutliers").checked,
+        muestra: document.getElementById("problemaMuestra").checked,
+        correlacion: document.getElementById("problemaCorrelacion").checked,
+        ceros: document.getElementById("problemaCeros").checked,
+        grupos: document.getElementById("problemaGrupos").checked
+      };
+
+      const clasificacion = determinarModelo(yTipo, yDistribucion, problemas, nMuestra);
+      const alertas = generarAlertas(variablesX, problemas, nMuestra, yTipo, yDistribucion);
+      const checklist = generarChecklist(yNombre, variablesX, clasificacion, problemas, yDistribucion, nMuestra);
+      const codigo = generarCodigoPython(yNombre, variablesX, clasificacion, yTipo, problemas, yDistribucion);
+      const tablaVariables = generarTablaVariables(variablesX);
+
+      document.getElementById("resultadoInicial").style.display = "none";
+
+      document.getElementById("resultadoClasificacion").innerHTML = `
+        <div class="classification">
+          <h3>Análisis recomendado</h3>
+          <p><strong>Modelo principal sugerido:</strong> ${escapar(clasificacion.modelo)}</p>
+          <p><strong>Nivel de prioridad:</strong> ${escapar(clasificacion.prioridad)}</p>
+          <p><strong>Justificación:</strong> ${escapar(clasificacion.justificacion)}</p>
+          <div>
+            ${clasificacion.etiquetas.map(e => `<span class="badge ${e.color}">${escapar(e.texto)}</span>`).join("")}
+          </div>
+        </div>
+
+        <h3>Resumen de tu diseño</h3>
+        <table>
+          <tr><th>Elemento</th><th>Información ingresada</th></tr>
+          <tr><td>Pregunta</td><td>${escapar(pregunta)}</td></tr>
+          <tr><td>Área</td><td>${traducir(area)}</td></tr>
+          <tr><td>Variable Y</td><td>${escapar(yNombre)} — tipo: ${traducir(yTipo)}, rango: ${escapar(yMin || "__")} a ${escapar(yMax || "__")}, unidades: ${escapar(yUnidad)}</td></tr>
+          <tr><td>Distribución esperada</td><td>${traducir(yDistribucion)}</td></tr>
+          <tr><td>Datos</td><td>Fuente: ${traducir(fuente)}; N = ${nMuestra || "__"}; unidad: ${escapar(unidad)}</td></tr>
+          <tr><td>Problemas reportados</td><td>${listarProblemas(problemas, problemasTexto)}</td></tr>
+        </table>
+
+        <h3>Variables independientes</h3>
+        ${tablaVariables}
+
+        <h3>Alertas metodológicas</h3>
+        ${alertas}
+      `;
+
+      document.getElementById("resultadoChecklist").innerHTML = checklist;
+      document.getElementById("resultadoCodigo").innerHTML = codigo;
+    }
+
+    function determinarModelo(yTipo, yDistribucion, problemas, nMuestra) {
+      let modelo = "Regresión lineal múltiple con OLS";
+      let prioridad = "Adecuado como modelo base";
+      let justificacion = "La variable dependiente parece continua y puede modelarse inicialmente como una función lineal de varias variables explicativas.";
+      let etiquetas = [{ texto: "OLS", color: "blue" }, { texto: "Diagnóstico de supuestos", color: "purple" }];
+
+      if (yTipo === "binaria") {
+        modelo = "Regresión logística binaria";
+        prioridad = "Más adecuado que OLS";
+        justificacion = "La variable Y es binaria, por lo que el objetivo no es predecir un valor continuo, sino una probabilidad de ocurrencia.";
+        etiquetas = [{ texto: "Logística", color: "green" }, { texto: "Probabilidades", color: "blue" }, { texto: "Odds ratio", color: "purple" }];
+      }
+
+      if (yTipo === "conteo") {
+        modelo = "Regresión de Poisson; evaluar binomial negativa si hay sobredispersión";
+        prioridad = "Recomendado para datos de conteo";
+        justificacion = "La variable Y representa conteos, por lo que puede violar los supuestos de normalidad y varianza constante de una regresión lineal.";
+        etiquetas = [{ texto: "Conteo", color: "green" }, { texto: "Poisson", color: "blue" }, { texto: "Sobredispersión", color: "yellow" }];
+      }
+
+      if (yTipo === "proporcion") {
+        modelo = "Regresión beta o GLM binomial/fraccional; OLS solo como exploratorio";
+        prioridad = "Requiere cautela";
+        justificacion = "La variable Y es una proporción acotada entre 0 y 1 o 0% y 100%, por lo que puede requerir modelos específicos para variables acotadas.";
+        etiquetas = [{ texto: "Proporción", color: "yellow" }, { texto: "Variable acotada", color: "purple" }];
+      }
+
+      if (yTipo === "continua" && yDistribucion === "sesgada") {
+        modelo = "Regresión lineal múltiple con OLS + transformación log/Box-Cox";
+        prioridad = "Modelo base viable con transformación a evaluar";
+        justificacion = "La variable Y es continua, pero se espera asimetría; conviene comparar modelo original contra modelo transformado.";
+        etiquetas = [{ texto: "OLS", color: "blue" }, { texto: "Log/Box-Cox", color: "yellow" }, { texto: "Comparar modelos", color: "purple" }];
+      }
+
+      if (yDistribucion === "ceroInflada" || problemas.ceros) {
+        modelo = "Modelo con tratamiento de cero-inflación; evaluar Poisson cero-inflado, hurdle o transformación según tipo de Y";
+        prioridad = "Alta cautela";
+        justificacion = "La presencia de muchos ceros puede indicar que un modelo lineal estándar no representa bien el proceso generador de datos.";
+        etiquetas = [{ texto: "Cero-inflación", color: "red" }, { texto: "Modelo alternativo", color: "yellow" }];
+      }
+
+      if (problemas.grupos) {
+        justificacion += " Además, al existir datos agrupados, debe evaluarse dependencia entre observaciones o errores agrupados.";
+        etiquetas.push({ texto: "Datos agrupados", color: "red" });
+      }
+
+      if (nMuestra > 0 && nMuestra < 50) {
+        prioridad = "Exploratorio; evitar sobreajuste";
+        justificacion += " El tamaño de muestra es pequeño, por lo que se recomienda usar pocos predictores y reportar limitaciones.";
+        etiquetas.push({ texto: "N pequeño", color: "yellow" });
+      }
+
+      return { modelo, prioridad, justificacion, etiquetas };
+    }
+
+    function generarAlertas(variablesX, problemas, nMuestra, yTipo, yDistribucion) {
+      const alertas = [];
+
+      if (variablesX.length < 3) {
+        alertas.push(`<div class="alert danger"><strong>Faltan variables X:</strong> se recomienda incluir al menos tres variables independientes justificadas teóricamente.</div>`);
+      } else {
+        alertas.push(`<div class="alert ok"><strong>Variables X suficientes:</strong> hay ${variablesX.length} predictores registrados. Revise que todos tengan justificación teórica.</div>`);
+      }
+
+      if (nMuestra > 0 && variablesX.length > 0) {
+        const razon = nMuestra / (variablesX.length + 1);
+        if (razon < 10) {
+          alertas.push(`<div class="alert warn"><strong>Riesgo de sobreajuste:</strong> hay pocas observaciones por parámetro. Reduzca predictores o trate el modelo como exploratorio.</div>`);
+        } else {
+          alertas.push(`<div class="alert ok"><strong>Relación N/predictores:</strong> parece razonable para un modelo inicial.</div>`);
+        }
+      }
+
+      if (problemas.ausentes) {
+        alertas.push(`<div class="alert warn"><strong>Datos ausentes:</strong> documente patrón de ausencias y evite eliminar casos sin revisar impacto.</div>`);
+      }
+
+      if (problemas.outliers) {
+        alertas.push(`<div class="alert warn"><strong>Outliers:</strong> revise Cook's D, leverage y validez sustantiva antes de eliminar observaciones.</div>`);
+      }
+
+      if (problemas.correlacion) {
+        alertas.push(`<div class="alert warn"><strong>Posible multicolinealidad:</strong> calcule matriz de correlaciones y VIF. Si VIF &gt; 5, justifique acciones correctivas.</div>`);
+      }
+
+      if (problemas.grupos) {
+        alertas.push(`<div class="alert danger"><strong>Dependencia potencial:</strong> si las observaciones están agrupadas por aula, empresa, comunidad o territorio, considere modelos multinivel o errores agrupados.</div>`);
+      }
+
+      if (yTipo === "continua" && yDistribucion === "normal") {
+        alertas.push(`<div class="alert ok"><strong>OLS como punto de partida:</strong> si los diagnósticos son aceptables, la regresión lineal es una opción razonable.</div>`);
+      }
+
+      return alertas.join("");
+    }
+
+    function generarChecklist(yNombre, variablesX, clasificacion, problemas, yDistribucion, nMuestra) {
+      const xFormula = variablesX.map(v => limpiarNombre(v.nombre)).join(" + ") || "X1 + X2 + X3";
+      const yFormula = limpiarNombre(yNombre);
+      const requiereLog = yDistribucion === "sesgada" || yDistribucion === "ceroInflada" || problemas.ceros;
+      const requiereVif = variablesX.length >= 2;
+
+      const items = [
+        "Cargar dataset desde Google Drive o desde archivo local.",
+        "Verificar estructura de datos: nombres de columnas, tipos de variable y tamaño de muestra.",
+        "Revisar datos ausentes con df.isnull().sum().",
+        "Calcular estadísticas descriptivas con describe() y dtypes.",
+        "Crear gráficos exploratorios: histogramas, boxplots y scatterplots.",
+        `Definir modelo base: ${yFormula} ~ ${xFormula}.`,
+        "Ajustar el modelo principal y guardar resultados.",
+        "Interpretar coeficientes en el contexto de la pregunta de tesis.",
+        "Reportar N, R², F, p-value global e intervalos de confianza.",
+        "Revisar normalidad de residuales con Q-Q plot y Shapiro-Wilk.",
+        "Revisar homocedasticidad con gráfico de residuales y prueba Breusch-Pagan.",
+        "Identificar outliers e influencia con Cook's D.",
+        "Preparar tabla de resultados en formato APA.",
+        "Generar al menos tres figuras: scatter con línea ajustada, diagnósticos y matriz de correlaciones."
+      ];
+
+      if (requiereVif) {
+        items.splice(11, 0, "Calcular VIF para detectar multicolinealidad entre predictores.");
+      }
+
+      if (requiereLog) {
+        items.splice(10, 0, `Probar transformación logarítmica o Box-Cox para ${yFormula}, comparando modelo original y transformado.`);
+      }
+
+      if (problemas.ausentes) {
+        items.splice(3, 0, "Documentar tratamiento de datos ausentes: eliminación, imputación o análisis de sensibilidad.");
+      }
+
+      if (problemas.grupos) {
+        items.push("Evaluar si corresponde usar errores robustos agrupados, modelo multinivel o efectos fijos según la estructura de los datos.");
+      }
+
+      return `
+        <h3>Checklist personalizado — Tu análisis</h3>
+        <p><strong>Modelo sugerido:</strong> ${escapar(clasificacion.modelo)}</p>
+        <div>
+          ${items.map((item, i) => `
+            <label class="checklist-item">
+              <input type="checkbox">
+              <span><strong>${i + 1}.</strong> ${escapar(item)}</span>
+            </label>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function generarCodigoPython(yNombre, variablesX, clasificacion, yTipo, problemas, yDistribucion) {
+      const y = limpiarNombre(yNombre);
+      const xs = variablesX.map(v => limpiarNombre(v.nombre)).filter(Boolean);
+      const formula = xs.length ? `${y} ~ ${xs.join(" + ")}` : `${y} ~ X1 + X2 + X3`;
+      const requiereLog = yDistribucion === "sesgada" || yDistribucion === "ceroInflada" || problemas.ceros;
+
+      let codigo = `# Plantilla base para Google Colab / Python\n`;
+      codigo += `import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport statsmodels.api as sm\nimport statsmodels.formula.api as smf\nfrom scipy import stats\n\n`;
+      codigo += `# 1. Cargar datos\n# from google.colab import drive\n# drive.mount('/content/drive')\n# df = pd.read_csv('/content/drive/MyDrive/tu_archivo.csv')\n\n`;
+      codigo += `# 2. Revisión inicial\nprint(df.shape)\nprint(df.dtypes)\nprint(df.isnull().sum())\nprint(df.describe())\n\n`;
+
+      if (yTipo === "binaria") {
+        codigo += `# 3. Modelo recomendado: regresión logística\nmodelo = smf.logit('${formula}', data=df).fit()\nprint(modelo.summary())\n\n`;
+        codigo += `# Odds ratios\nodds_ratios = np.exp(modelo.params)\nprint(odds_ratios)\n`;
+      } else if (yTipo === "conteo") {
+        codigo += `# 3. Modelo recomendado: Poisson para variable de conteo\nmodelo = smf.glm('${formula}', data=df, family=sm.families.Poisson()).fit()\nprint(modelo.summary())\n\n`;
+        codigo += `# Revisar sobredispersión: deviance / df_resid\nprint('Sobredispersión aproximada:', modelo.deviance / modelo.df_resid)\n`;
+      } else {
+        codigo += `# 3. Modelo base: regresión lineal OLS\nmodelo = smf.ols('${formula}', data=df).fit()\nprint(modelo.summary())\n\n`;
+        codigo += `# 4. Diagnósticos de residuales\nresid = modelo.resid\nfitted = modelo.fittedvalues\n\n`;
+        codigo += `# Normalidad: Shapiro-Wilk\nprint(stats.shapiro(resid))\n\n`;
+        codigo += `# Residuales vs ajustados\nplt.figure(figsize=(7,5))\nplt.scatter(fitted, resid)\nplt.axhline(0, linestyle='--')\nplt.xlabel('Valores ajustados')\nplt.ylabel('Residuales')\nplt.title('Residuales vs valores ajustados')\nplt.show()\n\n`;
+        codigo += `# Q-Q plot\nsm.qqplot(resid, line='45')\nplt.title('Q-Q plot de residuales')\nplt.show()\n\n`;
+        codigo += `# Cook's distance\ninfluence = modelo.get_influence()\ncooks_d = influence.cooks_distance[0]\nprint('Casos con Cook D alto:')\nprint(np.where(cooks_d > 4/len(df))[0])\n`;
+      }
+
+      if (xs.length >= 2) {
+        codigo += `\n# 5. Multicolinealidad: VIF\nfrom statsmodels.stats.outliers_influence import variance_inflation_factor\nX = df[[${xs.map(x => `'${x}'`).join(", ")}]].dropna()\nX_const = sm.add_constant(X)\nvif = pd.DataFrame()\nvif['variable'] = X_const.columns\nvif['VIF'] = [variance_inflation_factor(X_const.values, i) for i in range(X_const.shape[1])]\nprint(vif)\n`;
+      }
+
+      if (requiereLog && yTipo === "continua") {
+        const rhs = xs.join(" + ") || "X1 + X2 + X3";
+        codigo += `\n# 6. Transformación sugerida si Y es sesgada o tiene valores extremos\ndf['log_${y}'] = np.log(df['${y}'] + 1)\nmodelo_log = smf.ols('log_${y} ~ ${rhs}', data=df).fit()\nprint(modelo_log.summary())\nprint('Shapiro original:', stats.shapiro(modelo.resid))\nprint('Shapiro log:', stats.shapiro(modelo_log.resid))\n`;
+      }
+
+      return `
+        <h3>Plantilla mínima de código sugerida</h3>
+        <p class="small">El estudiante debe adaptar nombres de columnas y ruta del archivo. Esta plantilla es una guía inicial, no reemplaza la revisión metodológica.</p>
+        <div class="code-block">${escapar(codigo)}</div>
+      `;
+    }
+
+    function generarTablaVariables(variablesX) {
+      if (!variablesX.length) {
+        return `<div class="alert warn">No se han registrado variables independientes.</div>`;
+      }
+
+      return `
+        <table>
+          <tr>
+            <th>Variable</th>
+            <th>Tipo</th>
+            <th>Relación esperada</th>
+            <th>Justificación</th>
+          </tr>
+          ${variablesX.map(v => `
+            <tr>
+              <td>X${v.indice}: ${escapar(v.nombre)}</td>
+              <td>${traducir(v.tipo)}</td>
+              <td>${traducir(v.relacion)}</td>
+              <td>${escapar(v.justificacion || "Pendiente de justificar")}</td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
+    }
+
+    function listarProblemas(problemas, texto) {
+      const lista = [];
+      if (problemas.ausentes) lista.push("datos ausentes");
+      if (problemas.outliers) lista.push("outliers");
+      if (problemas.muestra) lista.push("muestra pequeña");
+      if (problemas.correlacion) lista.push("predictores correlacionados");
+      if (problemas.ceros) lista.push("muchos ceros");
+      if (problemas.grupos) lista.push("datos agrupados");
+      if (texto) lista.push(escapar(texto));
+      return lista.length ? lista.join("; ") : "No reportados";
+    }
+
+    function limpiarNombre(nombre) {
+      const limpio = (nombre || "")
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9_]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "");
+
+      if (!limpio) return "Y";
+      return /^[0-9]/.test(limpio) ? `var_${limpio}` : limpio;
+    }
+
+    function traducir(valor) {
+      const dic = {
+        socioeconomica: "Socio-económica",
+        tecnica: "Técnica / tecnológica",
+        ambiental: "Ambiental / territorial",
+        educativa: "Educativa",
+        salud: "Salud / bienestar",
+        gestion: "Gestión / administración",
+        otra: "Otra",
+        continua: "Continua",
+        conteo: "Conteo",
+        proporcion: "Proporción",
+        binaria: "Binaria",
+        normal: "Normal / simétrica",
+        sesgada: "Sesgada",
+        ceroInflada: "Cero-inflada",
+        desconocida: "Desconocida",
+        propia: "Propia",
+        secundaria: "Secundaria",
+        simulados: "Simulados",
+        mixta: "Mixta",
+        numerica: "Numérica",
+        categorica: "Categórica",
+        ordinal: "Ordinal",
+        positiva: "Positiva",
+        negativa: "Negativa",
+        incierta: "Incierta / exploratoria"
+      };
+      return dic[valor] || escapar(valor);
+    }
+
+    function escapar(texto) {
+      return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("pregunta").value = "¿Cuáles son los factores socio-económicos, técnicos o ambientales que explican la variabilidad en mi variable Y?";
+      document.getElementById("yNombre").value = "";
+      document.getElementById("yMin").value = "";
+      document.getElementById("yMax").value = "";
+      document.getElementById("yUnidad").value = "";
+      document.getElementById("nMuestra").value = "";
+      document.getElementById("nivelAnalisis").value = "";
+      document.getElementById("problemasTexto").value = "";
+      document.querySelectorAll("input[type='checkbox']").forEach(c => c.checked = false);
+      document.getElementById("variablesX").innerHTML = "";
+      contadorX = 0;
+      inicializarVariables();
+      document.getElementById("resultadoInicial").style.display = "block";
+      document.getElementById("resultadoClasificacion").innerHTML = "";
+      document.getElementById("resultadoChecklist").innerHTML = "";
+      document.getElementById("resultadoCodigo").innerHTML = "";
+    }
+
+    function inicializarVariables() {
+      agregarVariableX("", "numerica", "");
+      agregarVariableX("", "numerica", "");
+      agregarVariableX("", "numerica", "");
+    }
+
+    function runSelfTests() {
+      const tests = [];
+      const baseProblems = {
+        ausentes: false,
+        outliers: false,
+        muestra: false,
+        correlacion: false,
+        ceros: false,
+        grupos: false
+      };
+
+      function assertTest(nombre, condicion) {
+        tests.push({ nombre, ok: Boolean(condicion) });
+        if (!condicion) console.error(`Fallo en prueba: ${nombre}`);
+      }
+
+      const modeloLineal = determinarModelo("continua", "normal", baseProblems, 120);
+      assertTest("continua + normal recomienda OLS", modeloLineal.modelo.includes("Regresión lineal"));
+
+      const modeloLog = determinarModelo("binaria", "normal", baseProblems, 120);
+      assertTest("binaria recomienda logística", modeloLog.modelo.includes("logística"));
+
+      const modeloPoisson = determinarModelo("conteo", "normal", baseProblems, 120);
+      assertTest("conteo recomienda Poisson", modeloPoisson.modelo.includes("Poisson"));
+
+      const problemasCeros = { ...baseProblems, ceros: true };
+      const modeloCeros = determinarModelo("continua", "ceroInflada", problemasCeros, 120);
+      assertTest("cero-inflada activa modelo alternativo", modeloCeros.modelo.includes("cero-inflación"));
+
+      const checklist = generarChecklist(
+        "presión ambiental",
+        [
+          { nombre: "turismo" },
+          { nombre: "ingreso promedio" },
+          { nombre: "distancia parque" }
+        ],
+        modeloLineal,
+        baseProblems,
+        "normal",
+        120
+      );
+      assertTest("checklist genera fórmula limpia", checklist.includes("presion_ambiental ~ turismo + ingreso_promedio + distancia_parque"));
+
+      const codigo = generarCodigoPython(
+        "presión ambiental",
+        [
+          { nombre: "turismo" },
+          { nombre: "ingreso promedio" },
+          { nombre: "distancia parque" }
+        ],
+        modeloLineal,
+        "continua",
+        baseProblems,
+        "normal"
+      );
+      assertTest("código Python contiene smf.ols", codigo.includes("smf.ols"));
+
+      const passed = tests.filter(t => t.ok).length;
+      const total = tests.length;
+      const box = document.getElementById("resultadoTests");
+      if (box) {
+        box.innerHTML = `<strong>Pruebas internas:</strong> ${passed}/${total} correctas. ${passed === total ? "Sin errores detectados en la lógica base." : "Revise la consola del navegador."}`;
+      }
+    }
+
+    inicializarVariables();
+    runSelfTests();
+  </script>
+</body>
+</html>

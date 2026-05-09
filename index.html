@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorios Autogestionados - Inicio</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #eff6ff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e1e1e;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --sidebar-width: 280px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.03);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, #1e40af, var(--accent-color));
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .sidebar-header p { font-size: 0.85rem; opacity: 0.9; }
+
+        .nav-links { list-style: none; padding: 1rem 0; flex-grow: 1; }
+
+        .nav-links li a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li a:hover, .nav-links li a.active {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+        }
+
+        main {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 3rem;
+            max-width: 1200px;
+        }
+
+        header.page-header { margin-bottom: 3rem; animation: fadeInDown 0.8s ease-out; }
+
+        header.page-header h1 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        header.page-header p.lead { font-size: 1.15rem; color: var(--text-muted); max-width: 800px; }
+
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card:hover { 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            transform: translateY(-5px); 
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .card-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: auto;
+            text-decoration: none;
+        }
+
+        .card-btn:hover { background-color: var(--accent-hover); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 992px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+            main { margin-left: 0; padding: 2rem 1.5rem; }
+            .nav-links { display: flex; overflow-x: auto; padding: 0; }
+            .nav-links li a { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+            .nav-links li a.active { border-left: none; border-bottom-color: var(--accent-color); }
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="sidebar-header">
+            <h2>Laboratorios</h2>
+            <p>Portal Autogestionado</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">Inicio</a></li>
+            <li><a href="Labl 11 Mayo 202 ANOVA/index.html">ANOVA</a></li>
+            <li><a href="Labl 11 Mayo 202 Diseño Experimentos/index.html">Diseño de Experimentos</a></li>
+            <li><a href="Labl 11 Mayo 202 PCA y Cluster/index.html">PCA y Cluster</a></li>
+            <li><a href="Labl 11 Mayo 202 Regresión LIneal/index.html">Regresión Lineal</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <header class="page-header">
+            <h1>Plataforma de Laboratorios Autogestionados</h1>
+            <p class="lead">Seleccione uno de los módulos a continuación para acceder a los laboratorios interactivos. Cada módulo está diseñado para guiarlo a través de conceptos teóricos y aplicaciones prácticas en la gestión de datos.</p>
+        </header>
+
+        <div class="labs-grid">
+            <a href="Labl 11 Mayo 202 ANOVA/index.html" class="card">
+                <h2>📊 ANOVA</h2>
+                <p>Análisis de Varianza. Explore el diseño y análisis factorial de varianza, incluyendo ANOVA unifactorial, factorial con interacciones, supuestos y post-hoc.</p>
+                <div class="card-btn">Ingresar al Laboratorio</div>
+            </a>
+
+            <a href="Labl 11 Mayo 202 Diseño Experimentos/index.html" class="card">
+                <h2>🧪 Diseño de Experimentos</h2>
+                <p>Fundamentos y aplicaciones del Diseño de Experimentos (DOE). Aprenda a estructurar, ejecutar y analizar experimentos para optimizar procesos y decisiones.</p>
+                <div class="card-btn">Ingresar al Laboratorio</div>
+            </a>
+
+            <a href="Labl 11 Mayo 202 PCA y Cluster/index.html" class="card">
+                <h2>🧩 PCA y Cluster</h2>
+                <p>Análisis de Componentes Principales y Agrupamiento. Técnicas de reducción de dimensionalidad y descubrimiento de patrones en conjuntos de datos multivariados.</p>
+                <div class="card-btn">Ingresar al Laboratorio</div>
+            </a>
+
+            <a href="Labl 11 Mayo 202 Regresión LIneal/index.html" class="card">
+                <h2>📈 Regresión Lineal</h2>
+                <p>Modelado y predicción utilizando Regresión Lineal. Estudie la relación entre variables, ajuste de modelos, validación de supuestos e interpretación de coeficientes.</p>
+                <div class="card-btn">Ingresar al Laboratorio</div>
+            </a>
+        </div>
+    </main>
+
+</body>
+</html>
