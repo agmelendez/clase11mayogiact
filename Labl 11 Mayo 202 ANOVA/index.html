@@ -32,16 +32,16 @@
         body {
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: var(--text-main);
-            background-color: var(--bg-color);
+            color: #1e293b;
+            background-color: #f0f4f8;
             display: flex;
             min-height: 100vh;
         }
 
         aside {
-            width: var(--sidebar-width);
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
+            width: 280px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
             height: 100vh;
             position: fixed;
             top: 0; left: 0;
@@ -54,7 +54,7 @@
 
         .sidebar-header {
             padding: 2rem 1.5rem;
-            background: linear-gradient(135deg, #1e40af, var(--accent-color));
+            background: linear-gradient(135deg, #1e40af, #2563eb);
             color: white;
             text-align: center;
         }
@@ -67,7 +67,7 @@
         .nav-links li a {
             display: block;
             padding: 0.75rem 1.5rem;
-            color: var(--text-main);
+            color: #1e293b;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.95rem;
@@ -76,15 +76,15 @@
         }
 
         .nav-links li a:hover, .nav-links li a.active {
-            background-color: var(--accent-light);
-            color: var(--accent-color);
-            border-left-color: var(--accent-color);
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-left-color: #2563eb;
         }
 
-        .sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--border-color); text-align: center; }
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid #e2e8f0; text-align: center; }
 
         .btn-export {
-            background-color: var(--danger-color);
+            background-color: #ef4444;
             color: white;
             border: none;
             padding: 0.75rem 1.25rem;
@@ -103,7 +103,7 @@
 
         main {
             flex: 1;
-            margin-left: var(--sidebar-width);
+            margin-left: 280px;
             padding: 3rem;
             max-width: 1100px;
         }
@@ -112,20 +112,20 @@
 
         header.page-header h1 {
             font-size: 2.5rem;
-            color: var(--text-main);
+            color: #1e293b;
             font-weight: 800;
             letter-spacing: -0.5px;
             margin-bottom: 1rem;
         }
 
-        header.page-header p.lead { font-size: 1.15rem; color: var(--text-muted); max-width: 800px; }
+        header.page-header p.lead { font-size: 1.15rem; color: #64748b; max-width: 800px; }
 
         section { margin-bottom: 4rem; scroll-margin-top: 2rem; animation: fadeIn 1s ease-out; }
 
         .card {
-            background: var(--card-bg);
+            background: #ffffff;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             padding: 2.5rem;
             box-shadow: 0 4px 20px rgba(0,0,0,0.04);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -140,12 +140,12 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), #60a5fa);
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
         }
 
         .section-title {
             font-size: 1.75rem;
-            color: var(--text-main);
+            color: #1e293b;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
@@ -153,8 +153,8 @@
         }
 
         .section-title .badge {
-            background: var(--accent-light);
-            color: var(--accent-color);
+            background: #eff6ff;
+            color: #2563eb;
             font-size: 0.9rem;
             padding: 0.25rem 0.75rem;
             border-radius: 999px;
@@ -172,7 +172,7 @@
         pre[class*="language-"] {
             margin: 0 !important;
             padding: 1.5rem !important;
-            background: var(--code-bg) !important;
+            background: #1e1e1e !important;
             font-family: 'Fira Code', monospace !important;
             font-size: 0.9rem;
             border-radius: 8px;
@@ -194,7 +194,7 @@
         }
 
         .copy-btn:hover { background: rgba(255,255,255,0.2); }
-        .copy-btn.copied { background: var(--success-color); border-color: var(--success-color); }
+        .copy-btn.copied { background: #10b981; border-color: #10b981; }
 
         .student-workspace {
             margin-top: 2rem;
@@ -212,7 +212,7 @@
             background: #f8fafc;
             padding: 0 10px;
             font-weight: 600;
-            color: var(--accent-color);
+            color: #2563eb;
             font-size: 0.95rem;
         }
 
@@ -224,14 +224,14 @@
             margin-bottom: 0.5rem;
             font-weight: 600;
             font-size: 0.9rem;
-            color: var(--text-main);
+            color: #1e293b;
         }
 
         .editable-area {
             width: 100%;
             min-height: 80px;
             padding: 0.75rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
             background-color: white;
             font-family: 'Fira Code', monospace;
@@ -258,7 +258,7 @@
 
         .editable-area:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
 
@@ -272,11 +272,11 @@
             border-radius: 6px;
             margin-top: 0.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
         }
 
         .remove-img-btn {
-            background: var(--danger-color);
+            background: #ef4444;
             color: white;
             border: none;
             border-radius: 4px;
@@ -292,31 +292,31 @@
             border-radius: 8px;
             margin: 1.5rem 0;
             border-left: 4px solid;
-            background-color: var(--card-bg);
+            background-color: #ffffff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
 
-        .alert-info { border-left-color: var(--accent-color); background-color: var(--accent-light); }
-        .alert-warning { border-left-color: var(--warning-color); background-color: #fef3c7; }
-        .alert-success { border-left-color: var(--success-color); background-color: #d1fae5; }
-        .alert-danger { border-left-color: var(--danger-color); background-color: #fee2e2; }
+        .alert-info { border-left-color: #2563eb; background-color: #eff6ff; }
+        .alert-warning { border-left-color: #f59e0b; background-color: #fef3c7; }
+        .alert-success { border-left-color: #10b981; background-color: #d1fae5; }
+        .alert-danger { border-left-color: #ef4444; background-color: #fee2e2; }
         .alert strong { display: block; margin-bottom: 0.5rem; font-size: 1.05rem; }
 
         table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-        th, td { padding: 0.75rem 1rem; border: 1px solid var(--border-color); text-align: left; }
-        th { background-color: var(--accent-light); color: var(--accent-color); font-weight: 600; }
+        th, td { padding: 0.75rem 1rem; border: 1px solid #e2e8f0; text-align: left; }
+        th { background-color: #eff6ff; color: #2563eb; font-weight: 600; }
         tr:hover { background-color: #f8fafc; }
 
         .formula-block {
-            background-color: var(--bg-color);
+            background-color: #f0f4f8;
             padding: 1rem 1.5rem;
             border-radius: 8px;
             text-align: center;
             font-size: 1.15rem;
             font-family: 'Fira Code', monospace;
             margin: 1rem 0;
-            color: var(--accent-color);
-            border: 1px solid var(--border-color);
+            color: #2563eb;
+            border: 1px solid #e2e8f0;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -337,7 +337,7 @@
             main { margin-left: 0; padding: 2rem 1.5rem; }
             .nav-links { display: flex; overflow-x: auto; padding: 0; }
             .nav-links li a { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
-            .nav-links li a.active { border-left: none; border-bottom-color: var(--accent-color); }
+            .nav-links li a.active { border-left: none; border-bottom-color: #2563eb; }
         }
     </style>
 </head>
@@ -349,7 +349,7 @@
             <p>Análisis de Varianza Completo</p>
         </div>
         <ul class="nav-links">
-            <li><a href="../index.html" style="font-weight: 700; border-left: 4px solid var(--danger-color); color: var(--danger-color);">⬅ Volver al Menú Principal</a></li>
+            <li><a href="../index.html" style="font-weight: 700; border-left: 4px solid #ef4444; color: #ef4444;">⬅ Volver al Menú Principal</a></li>
             <li><a href="#intro" class="active">Introducción</a></li>
             <li><a href="#teoria-intro">I. T: ANOVA en Gestión Marina</a></li>
             <li><a href="#teoria-modelos">II. T: Partición de Varianza</a></li>
@@ -405,10 +405,10 @@
                 </div>
 
                 <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;" class="no-print">
-                    <a href="instrumento_simulacion_anova.html" class="copy-btn" style="text-decoration: none; display: inline-block; text-align: center; background-color: var(--accent-color); padding: 10px 20px; font-weight: 600;">
+                    <a href="instrumento_simulacion_anova.html" class="copy-btn" style="text-decoration: none; display: inline-block; text-align: center; background-color: #2563eb; padding: 10px 20px; font-weight: 600;">
                         🛠️ Instrumento de Simulación ANOVA
                     </a>
-                    <a href="clasificador_analisis_anova.html" class="copy-btn" style="text-decoration: none; display: inline-block; text-align: center; background-color: var(--accent-color); padding: 10px 20px; font-weight: 600;">
+                    <a href="clasificador_analisis_anova.html" class="copy-btn" style="text-decoration: none; display: inline-block; text-align: center; background-color: #2563eb; padding: 10px 20px; font-weight: 600;">
                         📊 Clasificador de Diseños ANOVA
                     </a>
                 </div>
@@ -587,7 +587,7 @@
                 <p>Se midió la biomasa de peces (kg/100m²) en 150 transectos submarinos distribuidos en un diseño factorial balanceado: 3 niveles de protección × 2 estaciones × 25 réplicas por celda.</p>
 
                 <h4 style="margin-top: 1rem;">2. Tabla ANOVA Simulada (Output de statsmodels)</h4>
-                <div class="code-container" style="background-color: var(--bg-color); padding: 1rem; border-radius: 8px; font-family: 'Fira Code', monospace; overflow-x: auto;">
+                <div class="code-container" style="background-color: #f0f4f8; padding: 1rem; border-radius: 8px; font-family: 'Fira Code', monospace; overflow-x: auto;">
 <pre style="margin: 0; font-size: 0.85rem; color: #a9b7c6;">
                  sum_sq    df           F         PR(>F)
 C(proteccion)  9814.23   2.0   87.46      8.41e-27  ***
@@ -1112,26 +1112,39 @@ for i in range(len(niveles)):
 
         // Exportar PDF
         function exportToPDF() {
-            const btn = document.querySelector('.btn-export');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '⏳ Generando PDF...';
-            btn.disabled = true;
-            const element = document.getElementById('lab-content');
-            const opt = {
-                margin: 0.5,
-                filename: 'Laboratorio_ANOVA_Entregable.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save().then(() => {
-                btn.innerHTML = orig;
-                btn.disabled = false;
-            }).catch(() => {
-                btn.innerHTML = '❌ Error';
-                setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 3000);
-            });
-        }
+    const btn = document.querySelector('button[onclick="exportToPDF()"]') || document.querySelector('.btn-export') || document.querySelector('.warning');
+    let originalText = '';
+    if(btn) { 
+        originalText = btn.innerHTML; 
+        btn.innerHTML = '⏳ Generando PDF...'; 
+        btn.disabled = true; 
+    }
+
+    const element = document.getElementById('lab-content') || document.body;
+    
+    const opt = {
+        margin:       0.4,
+        filename:     (document.title || 'Laboratorio').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    if (window.html2pdf) {
+        html2pdf().set(opt).from(element).save().then(() => {
+            if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        }).catch(err => {
+            console.error("Error generando PDF", err);
+            if(btn) { 
+                btn.innerHTML = '❌ Error'; 
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000); 
+            }
+        });
+    } else {
+        window.print();
+    }
+}
     </script>
 </body>
 </html>

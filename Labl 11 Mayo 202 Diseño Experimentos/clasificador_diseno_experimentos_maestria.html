@@ -11,25 +11,25 @@
       --code:#17212b;--gold:#f2c94c;--shadow:0 8px 24px rgba(0,0,0,.06)
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,Arial,Helvetica,sans-serif;line-height:1.6;min-height:100vh}
-    header{background:linear-gradient(135deg,var(--blue),var(--dark));color:white;padding:28px 36px;border-bottom:6px solid var(--gold)}
+    body{margin:0;background:#eef5f8;color:#173040;font-family:Inter,Arial,Helvetica,sans-serif;line-height:1.6;min-height:100vh}
+    header{background:linear-gradient(135deg,#005da4,#003f73);color:white;padding:28px 36px;border-bottom:6px solid #f2c94c}
     header h1{margin:0 0 8px;font-size:clamp(1.7rem,3vw,2.45rem);line-height:1.1}
     header p{margin:0;max-width:1050px;opacity:.95}
     main{max-width:1360px;margin:0 auto;padding:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.9fr);gap:24px}
-    .full{grid-column:1/-1}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;margin-bottom:24px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-    .card:before{content:"";position:absolute;top:0;left:0;width:100%;height:5px;background:linear-gradient(90deg,var(--blue),#57b5d8)}
-    h2{margin:0 0 16px;font-size:1.35rem;color:#102336} h3{margin:18px 0 8px;color:#102336}.small{font-size:.88rem;color:var(--mut)}
-    label{font-weight:800;margin:10px 0 6px;display:block} input,select,textarea{width:100%;border:1px solid #b9c8d1;border-radius:10px;padding:10px;font-size:.95rem;background:white;color:var(--txt)}
+    .full{grid-column:1/-1}.card{background:#fff;border:1px solid #d5e2ea;border-radius:16px;padding:26px;margin-bottom:24px;box-shadow:0 8px 24px rgba(0,0,0,.06);position:relative;overflow:hidden}
+    .card:before{content:"";position:absolute;top:0;left:0;width:100%;height:5px;background:linear-gradient(90deg,#005da4,#57b5d8)}
+    h2{margin:0 0 16px;font-size:1.35rem;color:#102336} h3{margin:18px 0 8px;color:#102336}.small{font-size:.88rem;color:#5c7180}
+    label{font-weight:800;margin:10px 0 6px;display:block} input,select,textarea{width:100%;border:1px solid #b9c8d1;border-radius:10px;padding:10px;font-size:.95rem;background:white;color:#173040}
     textarea{min-height:92px;resize:vertical}.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.nav-button,button{border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;gap:8px;align-items:center;justify-content:center;font-size:.94rem}
-    .nav-button{background:var(--blue);color:white}.nav-button.secondary{background:var(--dark)}button.primary{background:var(--blue);color:white}button.secondary{background:#e7eef3;color:#243947}button.warning{background:#f6ad55;color:#2d1600}button.success{background:var(--ok);color:white}button.danger{background:var(--bad);color:white}
-    button:disabled{opacity:.55;cursor:not-allowed}.result-panel{position:sticky;top:18px;align-self:start}.alert{border-left:5px solid var(--blue);background:var(--cyan);padding:16px;border-radius:12px;margin:18px 0}.alert-warning{border-left-color:var(--warn);background:#fff7dc}.alert-success{border-left-color:var(--ok);background:#e5f8ef}.alert-danger{border-left-color:var(--bad);background:#fdecec}
-    table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem}th,td{border:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}th{background:var(--cyan);color:var(--dark)}
-    code{background:#edf4f8;border:1px solid #d7e6ee;border-radius:6px;padding:2px 5px}.code-block{background:var(--code);color:#e8eef4;border-radius:12px;padding:14px;white-space:pre-wrap;max-height:640px;overflow:auto;font-family:Consolas,"Fira Code",monospace;font-size:.84rem}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#e9f5ff;color:var(--blue);font-weight:800;font-size:.82rem;margin:3px}.muted-box{background:#f8fbfd;border:1px dashed #b5c7d3;border-radius:12px;padding:14px;margin-top:12px}
+    .nav-button{background:#005da4;color:white}.nav-button.secondary{background:#003f73}button.primary{background:#005da4;color:white}button.secondary{background:#e7eef3;color:#243947}button.warning{background:#f6ad55;color:#2d1600}button.success{background:#138a5b;color:white}button.danger{background:#b83232;color:white}
+    button:disabled{opacity:.55;cursor:not-allowed}.result-panel{position:sticky;top:18px;align-self:start}.alert{border-left:5px solid #005da4;background:#e5f5fb;padding:16px;border-radius:12px;margin:18px 0}.alert-warning{border-left-color:#b7791f;background:#fff7dc}.alert-success{border-left-color:#138a5b;background:#e5f8ef}.alert-danger{border-left-color:#b83232;background:#fdecec}
+    table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem}th,td{border:1px solid #d5e2ea;padding:9px;text-align:left;vertical-align:top}th{background:#e5f5fb;color:#003f73}
+    code{background:#edf4f8;border:1px solid #d7e6ee;border-radius:6px;padding:2px 5px}.code-block{background:#17212b;color:#e8eef4;border-radius:12px;padding:14px;white-space:pre-wrap;max-height:640px;overflow:auto;font-family:Consolas,"Fira Code",monospace;font-size:.84rem}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#e9f5ff;color:#005da4;font-weight:800;font-size:.82rem;margin:3px}.muted-box{background:#f8fbfd;border:1px dashed #b5c7d3;border-radius:12px;padding:14px;margin-top:12px}
     @media(max-width:980px){main{grid-template-columns:1fr;padding:20px}.result-panel{position:static}.grid-2,.grid-3{grid-template-columns:1fr}}
     @media print{.no-print,.actions{display:none!important}body{background:white}main{display:block;max-width:none;padding:0}.card{box-shadow:none;break-inside:avoid}.result-panel{position:static}}
   </style>
-</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script></head>
 <body>
   <header>
     <h1>Clasificador de Diseño Experimental — Gestión Marino-Costera</h1>

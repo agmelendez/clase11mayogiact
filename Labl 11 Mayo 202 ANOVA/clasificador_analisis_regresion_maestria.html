@@ -26,13 +26,13 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: var(--gris-fondo);
-      color: var(--texto);
+      background: #f4f6f8;
+      color: #1f2933;
       line-height: 1.5;
     }
 
     header {
-      background: linear-gradient(135deg, var(--azul-ucr), #003f73);
+      background: linear-gradient(135deg, #005da4, #003f73);
       color: white;
       padding: 28px 36px;
       border-bottom: 6px solid #f2c94c;
@@ -66,8 +66,8 @@
     }
 
     .card {
-      background: var(--blanco);
-      border: 1px solid var(--gris-borde);
+      background: #ffffff;
+      border: 1px solid #d7dee5;
       border-radius: 16px;
       padding: 22px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
@@ -75,9 +75,9 @@
     }
 
     .card h2 {
-      color: var(--azul-ucr);
+      color: #005da4;
       margin-top: 0;
-      border-bottom: 2px solid var(--azul-claro);
+      border-bottom: 2px solid #e8f3fb;
       padding-bottom: 8px;
       font-size: 1.35rem;
     }
@@ -104,7 +104,7 @@
       border-radius: 10px;
       font-size: 0.95rem;
       background: white;
-      color: var(--texto);
+      color: #1f2933;
     }
 
     textarea {
@@ -140,7 +140,7 @@
     }
 
     .option {
-      border: 1px solid var(--gris-borde);
+      border: 1px solid #d7dee5;
       border-radius: 12px;
       padding: 10px;
       background: #fbfdff;
@@ -179,7 +179,7 @@
     }
 
     button.primary {
-      background: var(--azul-ucr);
+      background: #005da4;
       color: white;
     }
 
@@ -212,15 +212,15 @@
       margin: 4px 4px 4px 0;
     }
 
-    .badge.green { background: #dff5e8; color: var(--verde); }
-    .badge.yellow { background: #fff4d6; color: var(--amarillo); }
-    .badge.red { background: #fde2e2; color: var(--rojo); }
-    .badge.blue { background: var(--azul-claro); color: var(--azul-ucr); }
-    .badge.purple { background: #eee9ff; color: var(--morado); }
+    .badge.green { background: #dff5e8; color: #1b8a5a; }
+    .badge.yellow { background: #fff4d6; color: #b7791f; }
+    .badge.red { background: #fde2e2; color: #b83232; }
+    .badge.blue { background: #e8f3fb; color: #005da4; }
+    .badge.purple { background: #eee9ff; color: #5b4b8a; }
 
     .classification {
-      border-left: 6px solid var(--azul-ucr);
-      background: var(--azul-claro);
+      border-left: 6px solid #005da4;
+      background: #e8f3fb;
       padding: 14px;
       border-radius: 12px;
       margin: 12px 0;
@@ -282,7 +282,7 @@
 
     .test-box {
       background: #f8fafc;
-      border: 1px solid var(--gris-borde);
+      border: 1px solid #d7dee5;
       border-radius: 12px;
       padding: 10px 12px;
       margin-top: 14px;
@@ -297,14 +297,14 @@
     }
 
     th, td {
-      border: 1px solid var(--gris-borde);
+      border: 1px solid #d7dee5;
       padding: 9px;
       text-align: left;
       vertical-align: top;
     }
 
     th {
-      background: var(--azul-claro);
+      background: #e8f3fb;
       color: #003f73;
     }
 
@@ -339,7 +339,7 @@
       }
     }
   </style>
-</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script></head>
 <body>
   <header>
     <h1>Clasificador de Análisis Estadístico — Sprint 3</h1>
@@ -352,7 +352,7 @@
   <main>
     <div style="grid-column: 1 / -1; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
       <a href="index.html" style="display: inline-block; padding: 10px 16px; background-color: #003f73; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">← Volver al Laboratorio Principal</a>
-      <a href="instrumento_simulacion_regresion_sprint_3.html" style="display: inline-block; padding: 10px 16px; background-color: var(--azul-ucr); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Ir al Instrumento de Simulación →</a>
+      <a href="instrumento_simulacion_regresion_sprint_3.html" style="display: inline-block; padding: 10px 16px; background-color: #005da4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Ir al Instrumento de Simulación →</a>
     </div>
     <section>
       <div class="card">
@@ -459,7 +459,7 @@
         <div class="actions">
           <button class="primary" type="button" onclick="clasificarAnalisis()">Clasificar análisis</button>
           <button class="secondary" type="button" onclick="limpiarFormulario()">Limpiar</button>
-          <button class="warning" type="button" onclick="window.print()">Imprimir / guardar PDF</button>
+          <button class="warning" type="button" onclick="exportToPDF()">Imprimir / guardar PDF</button>
         </div>
       </div>
     </section>
@@ -982,5 +982,44 @@
     inicializarVariables();
     runSelfTests();
   </script>
+
+<script>
+
+function exportToPDF() {
+    const btn = document.querySelector('button[onclick="exportToPDF()"]') || document.querySelector('.btn-export') || document.querySelector('.warning');
+    let originalText = '';
+    if(btn) { 
+        originalText = btn.innerHTML; 
+        btn.innerHTML = '⏳ Generando PDF...'; 
+        btn.disabled = true; 
+    }
+
+    const element = document.getElementById('lab-content') || document.body;
+    
+    const opt = {
+        margin:       0.4,
+        filename:     (document.title || 'Laboratorio').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    if (window.html2pdf) {
+        html2pdf().set(opt).from(element).save().then(() => {
+            if(btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        }).catch(err => {
+            console.error("Error generando PDF", err);
+            if(btn) { 
+                btn.innerHTML = '❌ Error'; 
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000); 
+            }
+        });
+    } else {
+        window.print();
+    }
+}
+
+</script>
 </body>
 </html>
