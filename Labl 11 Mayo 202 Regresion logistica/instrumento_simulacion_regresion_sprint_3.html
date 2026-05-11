@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instrumento de Simulación y Ajuste de Regresión Logística - Sprint 3</title>
+  <style>
+    :root {
+      --azul: #005da4;
+      --azul-oscuro: #003f73;
+      --azul-claro: #e8f3fb;
+      --gris-fondo: #f4f6f8;
+      --gris-borde: #d7dee5;
+      --texto: #1f2933;
+      --verde: #1b8a5a;
+      --amarillo: #b7791f;
+      --rojo: #b83232;
+      --morado: #5b4b8a;
+      --blanco: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #1f2933;
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #005da4, #003f73);
+      color: white;
+      padding: 28px 36px;
+      border-bottom: 6px solid #f2c94c;
+    }
+
+    header h1 { margin: 0 0 8px; font-size: 2rem; }
+    header p { max-width: 1180px; margin: 0; opacity: .95; }
+
+    main {
+      max-width: 1360px;
+      margin: 26px auto;
+      padding: 0 20px 42px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1050px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #d7dee5;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      margin-bottom: 22px;
+    }
+
+    .card h2 {
+      color: #005da4;
+      margin-top: 0;
+      border-bottom: 2px solid #e8f3fb;
+      padding-bottom: 8px;
+      font-size: 1.35rem;
+    }
+
+    .card h3 {
+      color: #003f73;
+      margin-top: 22px;
+      font-size: 1.08rem;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #b9c4cf;
+      border-radius: 10px;
+      font-size: .95rem;
+      color: #1f2933;
+      background: white;
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    @media (max-width: 820px) {
+      .row, .row-3, .row-4 { grid-template-columns: 1fr; }
+    }
+
+    .var-box {
+      border: 1px dashed #9db4c8;
+      background: #fbfdff;
+      padding: 14px;
+      border-radius: 14px;
+      margin-top: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: .2s ease;
+      font-size: .95rem;
+    }
+
+    button.primary { background: #005da4; color: white; }
+    button.secondary { background: #e6edf3; color: #233; }
+    button.warning { background: #f6ad55; color: #2d1600; }
+    button.danger { background: #fde2e2; color: #b83232; }
+
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,.10); }
+
+    .result-panel { position: sticky; top: 18px; }
+
+    .alert {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+      border: 1px solid transparent;
+    }
+
+    .alert.ok { background: #eefaf3; border-color: #b7e4c7; }
+    .alert.warn { background: #fff8e1; border-color: #f5d57a; }
+    .alert.danger { background: #fdecec; border-color: #f5b5b5; }
+    .alert.info { background: #e8f3fb; border-color: #b7d7ee; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: bold;
+      font-size: .85rem;
+      margin: 4px 4px 4px 0;
+    }
+    .badge.blue { background: #e8f3fb; color: #005da4; }
+    .badge.green { background: #dff5e8; color: #1b8a5a; }
+    .badge.yellow { background: #fff4d6; color: #b7791f; }
+    .badge.red { background: #fde2e2; color: #b83232; }
+    .badge.purple { background: #eee9ff; color: #5b4b8a; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: .92rem;
+    }
+
+    th, td {
+      border: 1px solid #d7dee5;
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: #e8f3fb; color: #003f73; }
+
+    .code-block {
+      background: #1f2933;
+      color: #e6edf3;
+      padding: 14px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: .85rem;
+      white-space: pre-wrap;
+      max-height: 680px;
+    }
+
+    .small { font-size: .88rem; color: #52616f; }
+
+    .help {
+      display: block;
+      margin-top: 6px;
+      font-size: .82rem;
+      line-height: 1.35;
+      color: #52616f;
+      font-weight: normal;
+    }
+
+    .parameter-note {
+      background: #fbfdff;
+      border: 1px solid #d7dee5;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 12px 0 18px;
+      font-size: .9rem;
+      color: #364657;
+    }
+
+    .step {
+      border-left: 5px solid #005da4;
+      background: #fbfdff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .checklist-item input { width: auto; margin-top: 5px; }
+
+    .print-note { display: none; }
+
+    @media print {
+      body { background: white; }
+      header, .actions, .no-print { display: none !important; }
+      main { display: block; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .result-panel { position: static; }
+      .print-note { display: block; font-weight: bold; margin-bottom: 12px; }
+      .code-block { max-height: none; }
+    }
+  </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script></head>
+<body>
+  <header>
+    <h1>Instrumento de Simulación y Reajuste de Regresión Logística — Sprint 3</h1>
+    <p>
+      Herramienta complementaria para generar datos sintéticos con variable dependiente binaria, ajustar un modelo logístico,
+      evaluar probabilidades, odds ratios, desempeño predictivo y documentar el proceso metodológico sin cambiar la estructura visual del laboratorio.
+    </p>
+  </header>
+
+  <main>
+    <div style="grid-column: 1 / -1; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+      <a href="index.html" style="display: inline-block; padding: 10px 16px; background-color: #003f73; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">← Volver al Laboratorio Principal</a>
+      <a href="clasificador_analisis_regresion_maestria.html" style="display: inline-block; padding: 10px 16px; background-color: #005da4; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">← Volver al Clasificador de Análisis</a>
+    </div>
+
+    <section>
+      <div class="card">
+        <h2>1. Entrada desde el instrumento anterior</h2>
+        <p class="small">
+          Pegue una fórmula logística tipo <strong>Y ~ X1 + X2 + X3</strong> o un bloque de código Python que incluya
+          <code>smf.logit('Y ~ X1 + X2', data=df).fit()</code>. La variable dependiente debe representar un evento binario: 1 = ocurre, 0 = no ocurre.
+        </p>
+        <label for="codigoEntrada">Código generado por el instrumento anterior o fórmula del modelo</label>
+        <textarea id="codigoEntrada" placeholder="Ejemplo:\nmodelo = smf.logit('adopta_buena_practica ~ capacitacion + experiencia + distancia_area_protegida', data=df).fit()\n\nO solo:\nadopta_buena_practica ~ capacitacion + experiencia + distancia_area_protegida" style="min-height:260px; font-family:Consolas, Monaco, monospace; font-size:.86rem;"></textarea>
+        <label for="formulaModelo">Fórmula detectada / editable</label>
+        <input id="formulaModelo" type="text" value="adopta_buena_practica ~ capacitacion + experiencia_anios + distancia_km" />
+        <div class="row">
+          <div>
+            <label for="eventoY">Evento modelado cuando Y = 1</label>
+            <input id="eventoY" type="text" value="Adopta una buena práctica de gestión marina costera" />
+            <span class="help">Defina con precisión qué significa el 1. La regresión logística estima la probabilidad de este evento.</span>
+          </div>
+          <div>
+            <label for="lenguajeCodigo">Lenguaje del código</label>
+            <select id="lenguajeCodigo">
+              <option value="python">Python / Colab</option>
+              <option value="r">R</option>
+              <option value="ambos">R + Python</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="primary" type="button" onclick="leerEntrada()">Leer código/fórmula y construir variables</button>
+          <button class="secondary" type="button" onclick="usarFormulaEditable()">Usar solo fórmula editable</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. Supuestos de simulación logística</h2>
+        <p class="small">La simulación genera una probabilidad individual mediante una función logística. Después convierte esa probabilidad en una respuesta binaria mediante una distribución Bernoulli.</p>
+        <div class="parameter-note"><strong>Lectura pedagógica:</strong> el modelo no predice directamente kilogramos, puntajes o valores continuos. Predice <em>probabilidades</em>. Los coeficientes β cambian los log-odds y, al exponenciarlos, se interpretan como <em>odds ratios</em>.</div>
+        <div class="row-3">
+          <div>
+            <label for="nSim">N simulado</label>
+            <input id="nSim" type="number" value="180" min="40" />
+            <span class="help">Use al menos 10–20 eventos por predictor como regla inicial para evitar inestabilidad.</span>
+          </div>
+          <div>
+            <label for="prevalenciaBase">Prevalencia base esperada</label>
+            <input id="prevalenciaBase" type="number" value="0.45" min="0.02" max="0.98" step="0.01" />
+            <span class="help">Probabilidad aproximada del evento cuando los predictores están alrededor de su media.</span>
+          </div>
+          <div>
+            <label for="umbralClasificacion">Umbral de clasificación</label>
+            <input id="umbralClasificacion" type="number" value="0.50" min="0.05" max="0.95" step="0.01" />
+            <span class="help">Probabilidades mayores o iguales a este valor se clasifican como evento = 1.</span>
+          </div>
+        </div>
+        <div class="row-3">
+          <div>
+            <label for="semilla">Semilla reproducible</label>
+            <input id="semilla" type="number" value="123" />
+          </div>
+          <div>
+            <label for="escenario">Escenario de simulación</label>
+            <select id="escenario">
+              <option value="base">Base: balanceado y estable</option>
+              <option value="desbalance">Evento poco frecuente</option>
+              <option value="separacion">Separación casi perfecta</option>
+              <option value="multicolineal">Multicolinealidad entre predictores</option>
+              <option value="noLineal">Efecto no lineal omitido</option>
+            </select>
+            <span class="help">Permite provocar problemas frecuentes en regresión logística.</span>
+          </div>
+          <div>
+            <label for="validacion">Validación</label>
+            <select id="validacion">
+              <option value="train_test">Train/test 70/30</option>
+              <option value="cv">Validación cruzada 5-fold</option>
+              <option value="ninguna">Sin partición, solo didáctico</option>
+            </select>
+          </div>
+        </div>
+        <label for="contextoInvestigacion">Contexto sustantivo del proyecto</label>
+        <textarea id="contextoInvestigacion">El objetivo es estimar la probabilidad de ocurrencia de un evento binario en gestión marina costera, por ejemplo: adopción de buenas prácticas, cumplimiento de una norma, presencia de conflicto socioambiental o decisión de participar en un programa.</textarea>
+      </div>
+
+      <div class="card">
+        <h2>3. Variables X y parámetros</h2>
+        <p class="small">Ajuste tipo, distribución, media, desviación estándar y coeficiente logístico esperado. Un coeficiente positivo aumenta la probabilidad del evento; uno negativo la reduce.</p>
+        <div id="contenedorVariables"></div>
+        <div class="actions">
+          <button class="secondary" type="button" onclick="agregarVariableManual()">+ Agregar variable manual</button>
+          <button class="primary" type="button" onclick="generarInstrumento()">Generar simulación logística y código ajustado</button>
+          <button class="warning" type="button" onclick="exportToPDF()">Imprimir / guardar PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="result-panel">
+      <div class="card">
+        <p class="print-note">Reporte generado por el Instrumento de Simulación y Reajuste de Regresión Logística — Sprint 3</p>
+        <h2>Resultado del instrumento</h2>
+        <div id="resultadoInicial" class="alert info">Pegue o edite una fórmula, construya las variables y luego genere la simulación logística.</div>
+        <div id="resultadoMetodologia"></div>
+        <div id="resultadoModelo"></div>
+        <div id="resultadoSupuestos"></div>
+        <div id="resultadoCodigo"></div>
+      </div>
+    </aside>
+  </main>
+
+<script>
+let variables = [];
+function limpiarNombre(nombre){return String(nombre||'').trim().replace(/[^A-Za-z0-9_áéíóúÁÉÍÓÚñÑ]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') || 'variable';}
+function escapar(t){return String(t??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function escapeAttr(t){return escapar(t).replace(/`/g,'&#096;');}
+function logit(p){p=Math.min(Math.max(Number(p)||0.5,0.001),0.999); return Math.log(p/(1-p));}
+function leerEntrada(){const entrada=document.getElementById('codigoEntrada').value; const parsed=extraerFormulaDesdeCodigo(entrada); if(!parsed.ok){document.getElementById('resultadoInicial').className='alert danger';document.getElementById('resultadoInicial').innerHTML='No se pudo extraer una fórmula logística. Escriba manualmente algo como <code>Y ~ X1 + X2</code>.';return;} document.getElementById('formulaModelo').value=parsed.formula; construirVariables(parsed); mostrarResumen(parsed);}
+function usarFormulaEditable(){const f=document.getElementById('formulaModelo').value; const parsed=parsearFormula(f); if(!parsed.ok){document.getElementById('resultadoInicial').className='alert danger';document.getElementById('resultadoInicial').innerHTML=escapar(parsed.error);return;} construirVariables(parsed); mostrarResumen(parsed);}
+function extraerFormulaDesdeCodigo(entrada){entrada=String(entrada||''); const pats=[/smf\.logit\s*\(\s*['"]([^'"]+)['"]/i,/smf\.glm\s*\(\s*['"]([^'"]+)['"]/i,/glm\s*\(\s*([^,\n]+~[^,\n]+)/i,/([A-Za-z_][\w]*)\s*~\s*([^\n#]+)/]; for(const p of pats){const m=entrada.match(p); if(m){return parsearFormula((m[1]||m[0]).trim());}} return {ok:false,error:'No fórmula'};}
+function parsearFormula(formula){formula=String(formula||'').trim().replace(/\s+/g,' '); if(!formula.includes('~')) return {ok:false,error:'La fórmula debe tener el formato Y ~ X1 + X2'}; const parts=formula.split('~'); const y=limpiarNombre(parts[0]); const xs=parts.slice(1).join('~').split('+').map(x=>limpiarNombre(x.replace(/C\((.*?)\)/,'$1'))).filter(Boolean).filter(x=>x!=='1'); if(!y||xs.length===0) return {ok:false,error:'Debe existir una Y y al menos una X.'}; return {ok:true, formula: y+' ~ '+xs.join(' + '), y, xs};}
+function construirVariables(parsed){variables=parsed.xs.map((x,i)=>({nombre:x,tipo:i===0?'binaria':'numerica',distribucion:i===0?'bernoulli':'normal',media:i===0?0.45:50,sd:i===0?0.5:10,min:0,max:i===0?1:100,beta:i===0?0.8:(i===1?0.45:-0.35)})); renderVariables();}
+function mostrarResumen(p){document.getElementById('resultadoInicial').className='alert ok';document.getElementById('resultadoInicial').innerHTML=`<strong>Fórmula logística detectada:</strong> <code>${escapar(p.formula)}</code><br><span class="badge green">Y binaria</span><span class="badge blue">${p.xs.length} predictores</span>`;}
+function agregarVariableManual(){variables.push({nombre:'nueva_variable',tipo:'numerica',distribucion:'normal',media:50,sd:10,min:0,max:100,beta:0.25}); renderVariables(); actualizarFormula();}
+function actualizarFormula(){const p=parsearFormula(document.getElementById('formulaModelo').value); const y=p.ok?p.y:'evento'; document.getElementById('formulaModelo').value=y+' ~ '+variables.map(v=>limpiarNombre(v.nombre)).join(' + ');}
+function renderVariables(){const c=document.getElementById('contenedorVariables'); if(!variables.length){c.innerHTML='<div class="alert warn">No hay predictores. Lea una fórmula o agregue variables manualmente.</div>';return;} c.innerHTML=variables.map((v,i)=>`<div class="var-box"><div class="row"><div><label>Nombre X${i+1}</label><input value="${escapeAttr(v.nombre)}" onchange="actualizarVariable(${i},'nombre',this.value)"></div><div><label>Tipo</label><select onchange="actualizarVariable(${i},'tipo',this.value)"><option value="numerica" ${v.tipo==='numerica'?'selected':''}>Numérica</option><option value="binaria" ${v.tipo==='binaria'?'selected':''}>Binaria</option><option value="ordinal" ${v.tipo==='ordinal'?'selected':''}>Ordinal</option></select></div></div><div class="row-4"><div><label>Distribución</label><select onchange="actualizarVariable(${i},'distribucion',this.value)"><option value="normal" ${v.distribucion==='normal'?'selected':''}>Normal</option><option value="uniforme" ${v.distribucion==='uniforme'?'selected':''}>Uniforme</option><option value="bernoulli" ${v.distribucion==='bernoulli'?'selected':''}>Bernoulli</option><option value="ordinal" ${v.distribucion==='ordinal'?'selected':''}>Ordinal 1-5</option></select></div><div><label>Media / prob.</label><input type="number" step="0.01" value="${v.media}" onchange="actualizarVariable(${i},'media',this.value)"></div><div><label>Desv. estándar</label><input type="number" step="0.01" value="${v.sd}" onchange="actualizarVariable(${i},'sd',this.value)"></div><div><label>Coef. β logit</label><input type="number" step="0.01" value="${v.beta}" onchange="actualizarVariable(${i},'beta',this.value)"></div></div><div class="row"><div><span class="help">OR esperado ≈ <strong>${Math.exp(Number(v.beta)||0).toFixed(2)}</strong>. β positivo aumenta odds; β negativo las reduce.</span></div><div class="actions"><button class="danger" type="button" onclick="eliminarVariable(${i})">Eliminar</button></div></div></div>`).join('');}
+function actualizarVariable(i,campo,valor){if(['media','sd','min','max','beta'].includes(campo)) valor=Number(valor); if(campo==='nombre') valor=limpiarNombre(valor); variables[i][campo]=valor; renderVariables(); actualizarFormula();}
+function eliminarVariable(i){variables.splice(i,1); renderVariables(); actualizarFormula();}
+function obtenerConfig(){const parsed=parsearFormula(document.getElementById('formulaModelo').value); return {formula:parsed.formula,y:parsed.y,xs:variables.map(v=>limpiarNombre(v.nombre)),vars:variables,n:Number(nSim.value)||180,prevalencia:Number(prevalenciaBase.value)||0.45,intercepto:logit(Number(prevalenciaBase.value)||0.45),umbral:Number(umbralClasificacion.value)||0.5,semilla:Number(semilla.value)||123,escenario:escenario.value,validacion:validacion.value,lenguaje:lenguajeCodigo.value,evento:eventoY.value,contexto:contextoInvestigacion.value};}
+function generarInstrumento(){if(!variables.length) usarFormulaEditable(); const cfg=obtenerConfig(); document.getElementById('resultadoMetodologia').innerHTML=generarMetodologia(cfg); document.getElementById('resultadoModelo').innerHTML=generarModelo(cfg); document.getElementById('resultadoSupuestos').innerHTML=generarChecklist(cfg); document.getElementById('resultadoCodigo').innerHTML=generarCodigo(cfg);}
+function generarMetodologia(c){return `<h3>Metodología de simulación logística</h3><div class="step"><strong>1. Evento:</strong> ${escapar(c.evento)}.</div><div class="step"><strong>2. Predictor lineal:</strong> η = β₀ + β₁X₁ + ... + βₖXₖ, con β₀ = logit(${c.prevalencia.toFixed(2)}) = ${c.intercepto.toFixed(3)}.</div><div class="step"><strong>3. Probabilidad:</strong> p = 1 / (1 + exp(-η)).</div><div class="step"><strong>4. Respuesta:</strong> Y se genera como Bernoulli(p), por tanto cada fila termina en 0 o 1.</div>`+tablaParametros(c);}
+function tablaParametros(c){return `<h3>Parámetros de predictores</h3><table><tr><th>Variable</th><th>Tipo</th><th>Distribución</th><th>β logit</th><th>OR esperado</th></tr>${c.vars.map(v=>`<tr><td>${escapar(v.nombre)}</td><td>${escapar(v.tipo)}</td><td>${escapar(v.distribucion)}</td><td>${Number(v.beta).toFixed(3)}</td><td>${Math.exp(Number(v.beta)||0).toFixed(2)}</td></tr>`).join('')}</table>`;}
+function generarModelo(c){let alerta=''; if(c.escenario==='desbalance') alerta='<div class="alert warn"><strong>Evento poco frecuente:</strong> no use exactitud como único criterio. Priorice sensibilidad, especificidad, F1, PR-AUC y análisis del umbral.</div>'; if(c.escenario==='separacion') alerta='<div class="alert danger"><strong>Separación casi perfecta:</strong> puede producir coeficientes enormes o no convergencia. Considere regularización o Firth logistic regression.</div>'; if(c.escenario==='multicolineal') alerta='<div class="alert warn"><strong>Multicolinealidad:</strong> revise VIF, correlaciones y coherencia teórica antes de eliminar variables.</div>'; if(c.escenario==='noLineal') alerta='<div class="alert warn"><strong>Efecto no lineal:</strong> compare especificaciones con términos cuadráticos o splines.</div>'; return `<h3>Modelo recomendado</h3><div class="classification"><h3>Regresión logística binaria</h3><p>Modelo apropiado cuando Y tiene dos categorías y se desea estimar la probabilidad del evento. El reporte debe incluir coeficientes, odds ratios, intervalos de confianza, matriz de confusión, curva ROC/AUC y justificación del umbral.</p><span class="badge green">Logit</span><span class="badge blue">Probabilidades</span><span class="badge purple">Odds ratios</span><span class="badge yellow">ROC/AUC</span></div>${alerta}`;}
+function generarChecklist(c){const items=['Confirmar que Y está codificada 0/1 y que 1 representa el evento sustantivo.','Revisar frecuencia del evento y no-evento antes de modelar.','Justificar cada X con teoría o evidencia empírica.','Evaluar multicolinealidad entre predictores con VIF/correlaciones.','Reportar coeficientes logit y odds ratios con intervalos de confianza.','Evaluar desempeño con matriz de confusión, sensibilidad, especificidad, precisión, F1 y ROC-AUC.','Justificar el umbral de clasificación según el costo de falsos positivos y falsos negativos.','Verificar observaciones influyentes y problemas de separación.','Documentar limitaciones: asociación no implica causalidad.']; return `<h3>Checklist mínimo de calidad</h3>${items.map(x=>`<div class="checklist-item"><input type="checkbox"><span>${escapar(x)}</span></div>`).join('')}`;}
+function generarCodigo(c){let blocks=[]; if(c.lenguaje==='python'||c.lenguaje==='ambos') blocks.push(`<h3>Código Python / Google Colab</h3><pre class="code-block">${escapar(generarPython(c))}</pre>`); if(c.lenguaje==='r'||c.lenguaje==='ambos') blocks.push(`<h3>Código R</h3><pre class="code-block">${escapar(generarR(c))}</pre>`); return blocks.join('');}
+function pyList(c){return '['+c.vars.map(v=>`'${v.nombre}'`).join(', ')+']';}
+function generarPython(c){const xs=c.vars.map(v=>v.nombre), betas=c.vars.map(v=>Number(v.beta)||0), means=c.vars.map(v=>Number(v.media)||0), sds=c.vars.map(v=>Number(v.sd)||1); return `# REGRESIÓN LOGÍSTICA BINARIA - SIMULACIÓN SPRINT 3\nimport numpy as np\nimport pandas as pd\nimport statsmodels.api as sm\nimport statsmodels.formula.api as smf\nfrom sklearn.model_selection import train_test_split, cross_val_score\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import confusion_matrix, classification_report, roc_auc_score, RocCurveDisplay\nfrom statsmodels.stats.outliers_influence import variance_inflation_factor\nimport matplotlib.pyplot as plt\n\nnp.random.seed(${c.semilla})\nn = ${c.n}\ncols_x = ${pyList(c)}\nbetas = np.array(${JSON.stringify(betas)})\n\ndf = pd.DataFrame({'id': np.arange(1, n+1)})\n${c.vars.map(v=>{if(v.distribucion==='bernoulli'||v.tipo==='binaria') return `df['${v.nombre}'] = np.random.binomial(1, ${Math.min(Math.max(Number(v.media)||0.5,0.01),0.99)}, n)`; if(v.distribucion==='uniforme') return `df['${v.nombre}'] = np.random.uniform(${Number(v.min)||0}, ${Number(v.max)||100}, n)`; if(v.distribucion==='ordinal') return `df['${v.nombre}'] = np.random.choice([1,2,3,4,5], size=n, p=[.10,.20,.35,.25,.10])`; return `df['${v.nombre}'] = np.random.normal(${Number(v.media)||0}, ${Math.max(Number(v.sd)||1,0.001)}, n)`;}).join('\n')}\n${c.escenario==='multicolineal' && xs.length>1 ? `df['${xs[1]}'] = df['${xs[0]}'] * 0.85 + np.random.normal(0, 0.5, n)\n` : ''}${c.escenario==='desbalance' ? `# Evento poco frecuente: se reduce el intercepto base\n` : ''}${c.escenario==='separacion' && xs.length>0 ? `# Separación casi perfecta inducida por el primer predictor\n` : ''}intercepto = ${c.escenario==='desbalance' ? logit(0.12).toFixed(6) : c.intercepto.toFixed(6)}\nX_centered = df[cols_x] - df[cols_x].mean()\neta = intercepto + np.dot(X_centered.values, betas)\n${c.escenario==='noLineal' && xs.length>0 ? `eta = eta + 0.035 * (df['${xs[0]}'] - df['${xs[0]}'].mean())**2\n` : ''}${c.escenario==='separacion' && xs.length>0 ? `eta = eta + 4.0 * (df['${xs[0]}'] > df['${xs[0]}'].median()).astype(int)\n` : ''}df['prob_evento'] = 1 / (1 + np.exp(-eta))\ndf['${c.y}'] = np.random.binomial(1, df['prob_evento'])\n\nprint(df.head())\nprint('Prevalencia observada:', df['${c.y}'].mean().round(3))\n\nformula = '${c.y} ~ ${xs.join(' + ')}'\nmodelo = smf.logit(formula, data=df).fit(disp=False, maxiter=200)\nprint(modelo.summary())\n\n# Odds ratios e intervalos de confianza\nparams = modelo.params\nconf = modelo.conf_int()\nodds = pd.DataFrame({'OR': np.exp(params), 'IC_2.5%': np.exp(conf[0]), 'IC_97.5%': np.exp(conf[1]), 'p_value': modelo.pvalues})\nprint(odds)\n\n# Predicción y clasificación\numbral = ${c.umbral}\ndf['p_hat'] = modelo.predict(df)\ndf['y_pred'] = (df['p_hat'] >= umbral).astype(int)\nprint(confusion_matrix(df['${c.y}'], df['y_pred']))\nprint(classification_report(df['${c.y}'], df['y_pred'], zero_division=0))\nprint('ROC-AUC:', roc_auc_score(df['${c.y}'], df['p_hat']).round(3))\nRocCurveDisplay.from_predictions(df['${c.y}'], df['p_hat'])\nplt.show()\n\n# VIF para predictores\nX = sm.add_constant(df[cols_x])\nvif = pd.DataFrame({'variable': X.columns, 'VIF': [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]})\nprint(vif)\n\ndf.to_csv('datos_simulados_logistica_sprint3.csv', index=False)`;}
+function generarR(c){const xs=c.vars.map(v=>v.nombre); return `# REGRESIÓN LOGÍSTICA BINARIA - SIMULACIÓN SPRINT 3\nset.seed(${c.semilla})\nn <- ${c.n}\ncols_x <- c(${xs.map(x=>'"'+x+'"').join(', ')})\nbetas <- c(${c.vars.map(v=>Number(v.beta)||0).join(', ')})\ndatos <- data.frame(id = 1:n)\n${c.vars.map(v=>{if(v.distribucion==='bernoulli'||v.tipo==='binaria') return `datos$${v.nombre} <- rbinom(n, 1, ${Math.min(Math.max(Number(v.media)||0.5,0.01),0.99)})`; if(v.distribucion==='uniforme') return `datos$${v.nombre} <- runif(n, ${Number(v.min)||0}, ${Number(v.max)||100})`; if(v.distribucion==='ordinal') return `datos$${v.nombre} <- sample(1:5, n, replace = TRUE, prob = c(.10,.20,.35,.25,.10))`; return `datos$${v.nombre} <- rnorm(n, ${Number(v.media)||0}, ${Math.max(Number(v.sd)||1,0.001)})`;}).join('\n')}\nintercepto <- ${c.escenario==='desbalance' ? logit(0.12).toFixed(6) : c.intercepto.toFixed(6)}\nXc <- scale(datos[, cols_x], center = TRUE, scale = FALSE)\neta <- as.numeric(intercepto + Xc %*% betas)\np <- 1/(1+exp(-eta))\ndatos$prob_evento <- p\ndatos$${c.y} <- rbinom(n, 1, p)\n\nmodelo <- glm(${c.y} ~ ${xs.join(' + ')}, data = datos, family = binomial(link = 'logit'))\nsummary(modelo)\nexp(cbind(OR = coef(modelo), confint(modelo)))\n\numbral <- ${c.umbral}\ndatos$p_hat <- predict(modelo, type = 'response')\ndatos$y_pred <- ifelse(datos$p_hat >= umbral, 1, 0)\ntable(Real = datos$${c.y}, Predicho = datos$y_pred)\n\n# VIF: install.packages('car') si no está instalado\n# library(car); vif(modelo)\nwrite.csv(datos, 'datos_simulados_logistica_sprint3.csv', row.names = FALSE)`;}
+function exportToPDF(){const element=document.querySelector('main'); html2pdf().set({margin:0.35, filename:'instrumento_simulacion_logistica_sprint3.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'}}).from(element).save();}
+function inicializar(){usarFormulaEditable(); generarInstrumento();}
+inicializar();
+</script>
+</body>
+</html>

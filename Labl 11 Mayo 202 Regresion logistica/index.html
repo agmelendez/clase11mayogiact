@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Autoguiado: Regresión Logística Binaria</title>
+    
+    <!-- Fuentes de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js para resaltado de sintaxis de Python -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" />
+
+    <!-- html2pdf.js para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-light: #eff6ff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e1e1e;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #f0f4f8;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navegación */
+        aside {
+            width: 280px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 1rem 0;
+            flex-grow: 1;
+        }
+
+        .nav-links li a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li a:hover, .nav-links li a.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-left-color: #2563eb;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .btn-export {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-export:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-action {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-action.success { background-color: #10b981; }
+        .btn-action.success:hover { background-color: #059669; }
+        .btn-action:hover { background-color: #1d4ed8; }
+
+        /* Contenido Principal */
+        main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem;
+            max-width: 1100px;
+        }
+
+        header.page-header {
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        header.page-header h1 {
+            font-size: 2.5rem;
+            color: #1e293b;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        header.page-header p.lead {
+            font-size: 1.15rem;
+            color: #64748b;
+            max-width: 800px;
+        }
+
+        /* Secciones y Tarjetas */
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title .badge {
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 0.9rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        /* Estilos de Código */
+        .code-container {
+            position: relative;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        pre[class*="language-"] {
+            margin: 0 !important;
+            padding: 1.5rem !important;
+            background: #1e1e1e !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        /* ESPACIO DE TRABAJO DEL ESTUDIANTE */
+        .student-workspace {
+            margin-top: 2rem;
+            padding: 2rem;
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .student-workspace::before {
+            content: '✏️ Tu Espacio de Trabajo';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #f8fafc;
+            padding: 0 10px;
+            font-weight: 600;
+            color: #2563eb;
+            font-size: 0.95rem;
+        }
+
+        .workspace-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .workspace-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .workspace-field label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        /* Usamos contenteditable div en lugar de textarea para soportar PDF rendering nativo */
+        .editable-area {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: white;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Para preservar saltos de línea de resultados crudos */
+        }
+
+        .editable-area[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: #94a3b8;
+            pointer-events: none;
+            display: block;
+        }
+
+        .editable-area.interpretation-area {
+            min-height: 120px;
+            border-color: #93c5fd;
+            background-color: #eff6ff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+        
+        .editable-area:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .image-upload {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .image-preview {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .remove-img-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        /* Alertas y Callouts */
+        .alert {
+            padding: 1.25rem 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .alert-info { border-left-color: #2563eb; background-color: #eff6ff; }
+        .alert-warning { border-left-color: #f59e0b; background-color: #fef3c7; }
+        .alert-success { border-left-color: #10b981; background-color: #d1fae5; }
+        .alert strong { display: block; margin-bottom: 0.5rem; font-size: 1.05rem; }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos específicos para impresión/exportación PDF */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            main { margin-left: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            .card { box-shadow: none !important; border: none !important; margin-bottom: 20px; page-break-inside: avoid; }
+            .student-workspace { border: 1px solid #000 !important; background: white !important; page-break-inside: avoid; }
+            .editable-area { border: 1px solid #ccc !important; }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+            main { margin-left: 0; padding: 2rem 1.5rem; }
+            .sidebar-header { padding: 1.5rem; }
+            .nav-links { display: flex; overflow-x: auto; padding: 0; }
+            .nav-links li a { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+            .nav-links li a.active { border-left: none; border-bottom-color: #2563eb; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="no-print">
+        <div class="sidebar-header"><h2>Laboratorio Analítico</h2><p>Regresión Logística Binaria</p></div>
+        <ul class="nav-links">
+            <li><a href="../index.html" style="font-weight: 700; border-left: 4px solid #ef4444; color: #ef4444;">⬅ Volver al Menú Principal</a></li>
+            <li><a href="#intro" class="active">Introducción</a></li><li><a href="#teoria-intro">I. T: Variable binaria</a></li><li><a href="#teoria-modelos">II. T: Modelo logit</a></li><li><a href="#teoria-diagnostico">III. T: Diagnóstico</a></li><li><a href="#teoria-interpretacion">IV. T: Interpretación</a></li><li><a href="#modulo1">1. L: Generación Datos</a></li><li><a href="#modulo2">2. L: Modelo Logit</a></li><li><a href="#modulo3">3. L: Desempeño</a></li><li><a href="#modulo4">4. L: Umbrales</a></li><li><a href="#modulo5">5. L: Reporte</a></li>
+        </ul><div class="sidebar-footer"><button class="btn-export" onclick="exportToPDF()">Exportar PDF</button></div>
+    </aside>
+    <main>
+        <header class="page-header" id="intro"><h1>Sesión 9: Regresión Logística Binaria aplicada a Gestión Marina Costera</h1><p class="lead">Laboratorio autoguiado para estimar la probabilidad de ocurrencia de un evento: adopción de buenas prácticas, cumplimiento de normas, presencia de conflicto, participación comunitaria o riesgo socioambiental.</p><div class="alert alert-info"><strong>Propósito:</strong> pasar de modelos lineales para variables continuas a modelos probabilísticos para variables binarias, con énfasis en interpretación, clasificación y toma de decisiones.</div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+            <a href="clasificador_analisis_regresion_maestria.html" target="_blank" class="btn-action">📊 Abrir Clasificador</a>
+            <a href="instrumento_simulacion_regresion_sprint_3.html" target="_blank" class="btn-action success">⚙️ Abrir Simulador Logístico</a>
+        </div>
+        </header>
+        <section id="teoria-intro"><div class="card"><h2 class="section-title"><span class="badge">Teoría 1</span> ¿Cuándo usar regresión logística?</h2><p>Use regresión logística cuando la variable dependiente tiene dos categorías: sí/no, cumple/no cumple, participa/no participa, presencia/ausencia. El modelo estima la probabilidad de que ocurra el evento definido como <strong>Y = 1</strong>.</p><ul style="margin-left:2rem"><li>¿Qué factores aumentan la probabilidad de que una comunidad participe en un programa de manejo costero?</li><li>¿Qué variables predicen el cumplimiento de una norma ambiental?</li><li>¿Qué condiciones están asociadas con presencia de conflicto socioambiental?</li></ul><div class="alert alert-warning"><strong>Error frecuente:</strong> no interprete los coeficientes logísticos como cambios directos en unidades de Y. Deben leerse como cambios en log-odds u odds ratios.</div></div></section>
+        <section id="teoria-modelos"><div class="card"><h2 class="section-title"><span class="badge">Teoría 2</span> Ecuación del modelo logit</h2><p>La regresión logística transforma una combinación lineal de predictores en una probabilidad entre 0 y 1.</p><div class="code-container" style="background-color: var(--bg-color); padding: 1rem; border-radius: 8px; text-align:center; font-size:1.15rem; font-family:'Fira Code', monospace; color:var(--accent-color);">logit(p) = ln(p/(1-p)) = β₀ + β₁X₁ + β₂X₂ + ... + βₖXₖ</div><p>Luego, la probabilidad estimada se obtiene como:</p><div class="code-container" style="background-color: var(--bg-color); padding: 1rem; border-radius: 8px; text-align:center; font-size:1.15rem; font-family:'Fira Code', monospace; color:var(--accent-color);">p = 1 / (1 + exp(-η))</div><table><tr><th>Elemento</th><th>Interpretación</th></tr><tr><td>β positivo</td><td>Aumenta los odds del evento.</td></tr><tr><td>β negativo</td><td>Reduce los odds del evento.</td></tr><tr><td>exp(β)</td><td>Odds ratio. Si OR = 1.5, los odds aumentan 50% por unidad de X, manteniendo las demás constantes.</td></tr></table></div></section>
+        <section id="teoria-diagnostico"><div class="card"><h2 class="section-title"><span class="badge">Teoría 3</span> Diagnóstico y calidad del modelo</h2><p>En logística no se evalúan normalidad ni homocedasticidad de residuales como en OLS. El foco cambia hacia especificación, convergencia, separación, multicolinealidad, calibración y desempeño de clasificación.</p><table><tr><th>Aspecto</th><th>Qué revisar</th><th>Herramienta</th></tr><tr><td>Desbalance</td><td>Frecuencia de evento/no evento</td><td>Tabla de frecuencias</td></tr><tr><td>Colinealidad</td><td>Predictores redundantes</td><td>VIF/correlaciones</td></tr><tr><td>Clasificación</td><td>Aciertos y errores por clase</td><td>Matriz de confusión, sensibilidad, especificidad, F1</td></tr><tr><td>Discriminación</td><td>Separación entre eventos y no eventos</td><td>ROC-AUC</td></tr><tr><td>Calibración</td><td>Probabilidades bien alineadas con frecuencias observadas</td><td>Curva de calibración, Brier score</td></tr></table></div></section>
+        <section id="teoria-interpretacion"><div class="card"><h2 class="section-title"><span class="badge">Teoría 4</span> Interpretación para decisiones</h2><p>La decisión operativa no depende solo del p-valor. También importa el umbral de clasificación. Si un falso negativo es costoso, puede bajarse el umbral para aumentar sensibilidad; si un falso positivo es costoso, puede subirse.</p><div class="alert alert-success"><strong>Lectura sustantiva:</strong> “controlando por experiencia, distancia y capacitación, la capacitación tiene OR = 2.1; es decir, los odds de adopción son aproximadamente 2.1 veces mayores en personas capacitadas que en no capacitadas”.</div></div></section>
+        <section id="modulo1"><div class="card"><h2 class="section-title"><span class="badge">Módulo 1</span> Generación de datos sintéticos</h2><p>Ejecute este bloque en Google Colab para crear un caso costero con evento binario.</p><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-python">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from sklearn.metrics import confusion_matrix, classification_report, roc_auc_score, RocCurveDisplay
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+np.random.seed(42)
+n = 180
+
+df = pd.DataFrame({
+    "capacitacion": np.random.binomial(1, 0.48, n),
+    "experiencia_anios": np.random.uniform(1, 35, n),
+    "distancia_km": np.random.normal(18, 7, n),
+    "indice_presion_turistica": np.random.normal(55, 15, n),
+    "participacion_comunitaria": np.random.choice([1,2,3,4,5], n, p=[.10,.20,.30,.25,.15])
+})
+
+eta = (-1.20 + 1.05*df["capacitacion"] + 0.04*df["experiencia_anios"]
+       - 0.05*df["distancia_km"] - 0.015*df["indice_presion_turistica"]
+       + 0.38*df["participacion_comunitaria"])
+df["prob_adopcion"] = 1/(1+np.exp(-eta))
+df["adopta_buena_practica"] = np.random.binomial(1, df["prob_adopcion"])
+print(df.head())
+print(df["adopta_buena_practica"].value_counts(normalize=True))</code></pre></div><div class="student-workspace"><div class="workspace-field"><label>Interpretación inicial de la prevalencia observada:</label><div class="editable-area interpretation-area" contenteditable="true"></div></div></div></div></section>
+        <section id="modulo2"><div class="card"><h2 class="section-title"><span class="badge">Módulo 2</span> Ajuste del modelo logístico</h2><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-python">formula = "adopta_buena_practica ~ capacitacion + experiencia_anios + distancia_km + indice_presion_turistica + participacion_comunitaria"
+modelo = smf.logit(formula, data=df).fit(maxiter=200)
+print(modelo.summary())
+
+conf = modelo.conf_int()
+or_table = pd.DataFrame({
+    "OR": np.exp(modelo.params),
+    "IC_2.5%": np.exp(conf[0]),
+    "IC_97.5%": np.exp(conf[1]),
+    "p_value": modelo.pvalues
+})
+print(or_table)</code></pre></div><div class="student-workspace"><div class="workspace-field"><label>Pegue aquí la tabla de odds ratios:</label><div class="editable-area" contenteditable="true"></div></div><div class="workspace-field"><label>Interpretación de los OR principales:</label><div class="editable-area interpretation-area" contenteditable="true"></div></div></div></div></section>
+        <section id="modulo3"><div class="card"><h2 class="section-title"><span class="badge">Módulo 3</span> Desempeño predictivo</h2><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-python">df["p_hat"] = modelo.predict(df)
+umbral = 0.50
+df["pred_50"] = (df["p_hat"] >= umbral).astype(int)
+print(confusion_matrix(df["adopta_buena_practica"], df["pred_50"]))
+print(classification_report(df["adopta_buena_practica"], df["pred_50"], zero_division=0))
+print("ROC-AUC:", roc_auc_score(df["adopta_buena_practica"], df["p_hat"]))
+RocCurveDisplay.from_predictions(df["adopta_buena_practica"], df["p_hat"])
+plt.show()</code></pre></div><div class="student-workspace"><div class="workspace-field"><label>Conclusión sobre sensibilidad, especificidad y AUC:</label><div class="editable-area interpretation-area" contenteditable="true"></div></div></div></div></section>
+        <section id="modulo4"><div class="card"><h2 class="section-title"><span class="badge">Módulo 4</span> Umbrales, VIF e interacción</h2><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-python">for t in [0.30, 0.40, 0.50, 0.60, 0.70]:
+    pred = (df["p_hat"] >= t).astype(int)
+    print("\nUmbral", t)
+    print(confusion_matrix(df["adopta_buena_practica"], pred))
+
+cols_x = ["capacitacion", "experiencia_anios", "distancia_km", "indice_presion_turistica", "participacion_comunitaria"]
+X = sm.add_constant(df[cols_x])
+vif = pd.DataFrame({"variable": X.columns, "VIF": [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]})
+print(vif)
+
+modelo_inter = smf.logit("adopta_buena_practica ~ capacitacion * participacion_comunitaria + experiencia_anios + distancia_km + indice_presion_turistica", data=df).fit(maxiter=200)
+print(modelo_inter.summary())</code></pre></div><div class="student-workspace"><div class="workspace-field"><label>¿Qué umbral recomendaría y por qué?</label><div class="editable-area interpretation-area" contenteditable="true"></div></div></div></div></section>
+        <section id="modulo5"><div class="card"><h2 class="section-title"><span class="badge">Módulo 5</span> Reporte metodológico mínimo</h2><ol style="margin-left:2rem"><li>Defina Y=1 y Y=0.</li><li>Describa muestra, prevalencia y predictores.</li><li>Reporte fórmula, coeficientes, OR, IC95% y p-valores.</li><li>Incluya matriz de confusión, sensibilidad, especificidad, F1 y ROC-AUC.</li><li>Explique el umbral elegido y sus implicaciones para la decisión.</li><li>Declare limitaciones: asociación, no causalidad; posible sesgo de medición; estabilidad del modelo.</li></ol><div class="alert alert-info"><strong>Producto final:</strong> un reporte breve capaz de justificar técnica y sustantivamente por qué se eligió un modelo logístico y cómo se interpreta en decisiones reales de gestión.</div></div></section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>function copyCode(btn){const code=btn.parentElement.querySelector('code').innerText;navigator.clipboard.writeText(code);btn.textContent='Copiado';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('copied');},1600);}function exportToPDF(){html2pdf().set({margin:0.35,filename:'laboratorio_regresion_logistica.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'letter',orientation:'portrait'}}).from(document.querySelector('main')).save();}</script>
+</body>
+</html>
