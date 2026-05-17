@@ -431,7 +431,7 @@
         <div class="sidebar-header"><h2>Laboratorio Analítico</h2><p>Regresión Logística Binaria</p></div>
         <ul class="nav-links">
             <li><a href="../index.html" style="font-weight: 700; border-left: 4px solid #ef4444; color: #ef4444;">⬅ Volver al Menú Principal</a></li>
-            <li><a href="#intro" class="active">Introducción</a></li><li><a href="#teoria-intro">I. T: Variable binaria</a></li><li><a href="#teoria-modelos">II. T: Modelo logit</a></li><li><a href="#teoria-diagnostico">III. T: Diagnóstico</a></li><li><a href="#teoria-interpretacion">IV. T: Interpretación</a></li><li><a href="#modulo1">1. L: Generación Datos</a></li><li><a href="#modulo2">2. L: Modelo Logit</a></li><li><a href="#modulo3">3. L: Desempeño</a></li><li><a href="#modulo4">4. L: Umbrales</a></li><li><a href="#modulo5">5. L: Reporte</a></li>
+            <li><a href="#intro" class="active">Introducción</a></li><li><a href="#teoria-intro">I. T: Variable binaria</a></li><li><a href="#teoria-modelos">II. T: Modelo logit</a></li><li><a href="#teoria-diagnostico">III. T: Diagnóstico</a></li><li><a href="#teoria-interpretacion">IV. T: Interpretación</a></li><li><a href="#modulo1">1. L: Generación Datos</a></li><li><a href="#modulo2">2. L: Modelo Logit</a></li><li><a href="#modulo3">3. L: Desempeño</a></li><li><a href="#modulo4">4. L: Umbrales</a></li><li><a href="#modulo5">5. L: Reporte</a></li><li><a href="#modulo6">6. L: Logística en R</a></li><li><a href="#modulo7">7. L: Validación Multivariada</a></li>
         </ul><div class="sidebar-footer"><button class="btn-export" onclick="exportToPDF()">Exportar PDF</button></div>
     </aside>
     <main>
@@ -504,8 +504,54 @@ print(vif)
 modelo_inter = smf.logit("adopta_buena_practica ~ capacitacion * participacion_comunitaria + experiencia_anios + distancia_km + indice_presion_turistica", data=df).fit(maxiter=200)
 print(modelo_inter.summary())</code></pre></div><div class="student-workspace"><div class="workspace-field"><label>¿Qué umbral recomendaría y por qué?</label><div class="editable-area interpretation-area" contenteditable="true"></div></div></div></div></section>
         <section id="modulo5"><div class="card"><h2 class="section-title"><span class="badge">Módulo 5</span> Reporte metodológico mínimo</h2><ol style="margin-left:2rem"><li>Defina Y=1 y Y=0.</li><li>Describa muestra, prevalencia y predictores.</li><li>Reporte fórmula, coeficientes, OR, IC95% y p-valores.</li><li>Incluya matriz de confusión, sensibilidad, especificidad, F1 y ROC-AUC.</li><li>Explique el umbral elegido y sus implicaciones para la decisión.</li><li>Declare limitaciones: asociación, no causalidad; posible sesgo de medición; estabilidad del modelo.</li></ol><div class="alert alert-info"><strong>Producto final:</strong> un reporte breve capaz de justificar técnica y sustantivamente por qué se eligió un modelo logístico y cómo se interpreta en decisiones reales de gestión.</div></div></section>
+        
+        <section id="modulo6"><div class="card"><h2 class="section-title"><span class="badge">Módulo 6</span> Regresión Logística en R</h2><p>A continuación se muestra el código equivalente para realizar la regresión logística en el lenguaje R, utilizando la función base <code>glm()</code> y obteniendo las predicciones para evaluar la matriz de confusión.</p><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-r"># Ajustar el modelo de regresión logística
+modelo_r <- glm(adopta_buena_practica ~ capacitacion + experiencia_anios + 
+                  distancia_km + indice_presion_turistica + participacion_comunitaria,
+                data = df, family = binomial(link = "logit"))
+
+# Resumen del modelo (coeficientes y p-valores)
+summary(modelo_r)
+
+# Odds Ratios
+exp(coef(modelo_r))
+
+# Predicciones de probabilidad
+df$prob_estimada <- predict(modelo_r, type = "response")
+
+# Predicciones de clase (Umbral 0.50)
+umbral <- 0.50
+df$prediccion <- ifelse(df$prob_estimada >= umbral, 1, 0)
+
+# Matriz de Confusión
+tabla_confusion <- table(Prediccion = df$prediccion, Observado = df$adopta_buena_practica)
+print(tabla_confusion)</code></pre></div><div class="student-workspace"><div class="workspace-field"><label>Notas sobre la función glm():</label><div class="editable-area interpretation-area" contenteditable="true">Observe que en R, el parámetro family = binomial(link = "logit") es el que indica que queremos ajustar una Regresión Logística. El resultado de predict() con type = "response" produce probabilidades directamente (entre 0 y 1).</div></div></div></div></section>
+        
+        <section id="modulo7"><div class="card"><h2 class="section-title"><span class="badge">Módulo 7</span> Validación de Modelos Multivariados</h2><p>La <strong>partición de datos (entrenamiento/prueba)</strong> y la <strong>validación cruzada</strong> son fundamentales para evitar el sobreajuste (overfitting) y estimar con mayor precisión el desempeño real del modelo predictivo en nuevos datos.</p><h3>Partición Entrenamiento / Prueba</h3><p>Al ajustar un modelo logístico con todos los datos, medimos un rendimiento que suele ser más optimista que en la realidad. La partición separa aleatoriamente el conjunto de datos (por ejemplo, 70% entrenamiento, 30% prueba) garantizando probar el modelo sobre observaciones inéditas.</p><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-python">from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+# 1. Separación de características y variable objetivo
+X_vars = df[["capacitacion", "experiencia_anios", "distancia_km", "indice_presion_turistica", "participacion_comunitaria"]]
+y_var = df["adopta_buena_practica"]
+
+# 2. Partición Train / Test (70% - 30%)
+X_train, X_test, y_train, y_test = train_test_split(X_vars, y_var, test_size=0.30, random_state=42)
+
+# 3. Ajuste sobre conjunto de entrenamiento y evaluación sobre prueba
+clf = LogisticRegression()
+clf.fit(X_train, y_train)
+
+# Evaluación
+y_pred_test = clf.predict(X_test)
+print(classification_report(y_test, y_pred_test))</code></pre></div><h3>Validación Cruzada (K-Fold Cross-Validation)</h3><p>La validación cruzada extiende esta idea dividiendo los datos en <em>K</em> pliegues. El modelo se entrena iterativamente en <em>K-1</em> pliegues y se prueba en el pliegue restante, promediando luego los resultados. Esto asegura que la partición aleatoria no afecte la métrica final y se empleen todos los datos para evaluación.</p><div class="code-container"><button class="copy-btn" onclick="copyCode(this)">Copiar</button><pre><code class="language-python">from sklearn.model_selection import cross_val_score
+
+# Validación cruzada con 5 particiones (5-Fold CV)
+scores_auc = cross_val_score(clf, X_vars, y_var, cv=5, scoring='roc_auc')
+
+print("Resultados de AUC en cada partición:", scores_auc.round(3))
+print("AUC Promedio de Validación Cruzada:", scores_auc.mean().round(3))</code></pre></div></div></section>
     </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-r.min.js"></script>
     <script>function copyCode(btn){const code=btn.parentElement.querySelector('code').innerText;navigator.clipboard.writeText(code);btn.textContent='Copiado';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('copied');},1600);}function exportToPDF(){html2pdf().set({margin:0.35,filename:'laboratorio_regresion_logistica.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'letter',orientation:'portrait'}}).from(document.querySelector('main')).save();}</script>
 </body>
 </html>
